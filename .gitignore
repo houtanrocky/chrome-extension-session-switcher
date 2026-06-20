@@ -3,4 +3,5 @@ node_modules
 .wxt
 stats.html
 *.zip
+*-shot.png
 .DS_Store
