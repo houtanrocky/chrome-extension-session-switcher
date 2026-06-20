@@ -111,10 +111,12 @@ select `.output/chrome-mv3`.
 
 ## Honest limitations
 
-- **Site service workers.** A site's own service worker makes requests with no
-  tab id, so the per-tab DNR rule can't target them. Sites that route
-  authenticated traffic through a SW may leak to the shared profile. Most
-  targeted AI sites authenticate via normal document/XHR requests and are fine.
+- **Site service workers (handled).** A site's own service worker makes requests
+  with no tab id, so the per-tab cookie rule can't target them — left alone, a
+  SW-driven site would leak every session onto the shared profile. To prevent
+  this, **managed tabs disable service workers** (registration is blocked and
+  any existing worker is unregistered). The cost: managed tabs don't get that
+  site's offline cache or web push. Unmanaged tabs are unaffected.
 - **Cross-origin SSO.** Logins that depend on a *separate* identity domain
   (e.g. Google account for Gemini) aren't isolated by domain-scoped cookies and
   may behave inconsistently.

@@ -46,6 +46,10 @@ namespace**.
 
 ### Changes since the original handoff
 
+- **Fixed service-worker cookie leakage** (reproduced on claude.ai: two sessions
+  collapsed onto one account after a reload). Managed tabs now disable service
+  workers — see "Known limitations" for the full mechanism + trade-off. Pinned
+  by a real-Chrome regression test, `test/e2e-sw.mjs`.
 - **Fixed `bindTab` ("Use here") silently not isolating storage.** Appending the
   `#__ssns=<id>` marker to the tab's *current* URL is a same-document
   navigation, so the `document_start` storage shim never re-ran and the
@@ -161,10 +165,13 @@ only `gen-icons.mjs`, the dependency-free icon generator.)
   **two concurrent sessions staying separate**, import-login, export/import,
   delete-detaches-tabs.
 
-**End-to-end in real Chrome (`npm run test:e2e`, `test/e2e.mjs`):** builds the
-extension, loads it in real Chrome, and drives a local fake-login server to
-verify, with no real accounts: concurrent isolated logins (Alice vs Bob), the
-shared browser profile staying clean, and per-session web-storage namespacing.
+**End-to-end in real Chrome (`npm run test:e2e`):** builds the extension, loads
+it in real Chrome, and drives a local fake-login server (no real accounts):
+- `test/e2e.mjs` — concurrent isolated logins (Alice vs Bob), the shared browser
+  profile staying clean, and per-session web-storage namespacing.
+- `test/e2e-sw.mjs` — the **service-worker regression**: a site whose SW
+  intercepts requests must not break a managed tab's identity (the claude.ai
+  bug). Shared helpers live in `test/harness.mjs`.
 
 > The E2E needs a Chrome that still honours `--load-extension`. Regular Chrome
 > ≥137 ignores it (a malware mitigation), so the harness uses **Chrome for
@@ -189,10 +196,16 @@ shared browser profile staying clean, and per-session web-storage namespacing.
 
 ## Known limitations / things to watch when testing
 
-- **Site service workers:** a site's own SW issues requests with tabId == -1, so
-  the per-tab DNR rule can't target them → those may use the shared profile.
-  This is the most likely real-world breakage on heavy SPAs. Watch for it on
-  ChatGPT/Claude; if auth leaks, this is why.
+- **Site service workers — FIXED (was the #1 risk; reproduced on claude.ai).** A
+  site's own SW issues requests with tabId == -1, which the per-tab DNR rule
+  can't target, so a SW-driven SPA collapsed every session onto the shared
+  profile once its worker took control (after the first reload). The storage
+  shim now **disables service workers in managed tabs** (`disableServiceWorkers`
+  in `entrypoints/storage-shim.content.ts`): it blocks registration and
+  unregisters any worker from a prior unmanaged visit (with a one-shot reload),
+  forcing all traffic through the tab-scoped path. Covered by `test/e2e-sw.mjs`.
+  *Trade-off:* managed tabs lose SW features (offline cache, web push) — an
+  acceptable cost for correct isolation. Unmanaged tabs keep their SW.
 - **Set-Cookie capture vs strip ordering:** we both observe `Set-Cookie`
   (webRequest) and strip it (DNR). On Chrome the observer generally still sees
   the original; if captures are missed, verify ordering behavior.
