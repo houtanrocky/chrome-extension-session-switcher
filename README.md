@@ -59,6 +59,11 @@ UI calls over a typed message protocol (`lib/messaging.ts`). The cookie backend
 lives entirely behind this class, so a future **true-proxy** backend can be
 swapped in without touching the UI.
 
+> **Deep dive:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the full
+> technical write-up — the cookie capture/inject loop, the storage shim,
+> service-worker neutralization, the lifecycle of each operation, and a precise
+> table of what is and isn't isolated.
+
 ---
 
 ## Using it
