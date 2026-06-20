@@ -75,14 +75,30 @@ npm run dev         # launches Chrome with the extension + HMR
 npm run build       # production build → .output/chrome-mv3
 npm run zip         # packaged zip for the Web Store
 npm run compile     # type-check only (tsc --noEmit)
+npm test            # unit + integration tests (Vitest)
+npm run test:e2e    # end-to-end isolation test in real Chrome
 ```
+
+### Tests
+
+`npm test` runs the engine suite (cookie parsing, domain resolution, the
+storage-namespace protocol, and the `SessionManager` against a faked `chrome`
+API — including proof that two concurrent sessions stay separate).
+
+`npm run test:e2e` loads the built extension into **real Chrome** and, using a
+local fake-login server (no real accounts), verifies that two sessions stay
+logged into different identities at once, that the browser's shared profile is
+never touched, and that web storage is namespaced per session. It uses
+[Chrome for Testing](https://developer.chrome.com/blog/chrome-for-testing)
+because regular Chrome ≥137 ignores `--load-extension`; the harness installs it
+on demand (or set `CHROME_PATH` to your own).
 
 Load unpacked: `chrome://extensions` → Developer mode → **Load unpacked** →
 select `.output/chrome-mv3`.
 
-> **Icons:** drop PNGs at `public/icon/{16,32,48,96,128}.png` (or `assets/icon.png`)
-> and WXT wires them into the manifest. Without them the build still works,
-> just with a default toolbar icon.
+> **Icons:** the toolbar icons live at `public/icon/{16,32,48,96,128}.png` and
+> WXT wires them into the manifest automatically. They're generated (no image
+> deps) by `node scripts/gen-icons.mjs` — edit that script to change the mark.
 
 ---
 

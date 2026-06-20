@@ -11,6 +11,9 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "wxt build && node test/e2e.mjs",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
@@ -18,9 +21,12 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.3",
+    "@puppeteer/browsers": "^3.0.4",
     "@types/chrome": "^0.0.287",
+    "puppeteer-core": "^25.1.0",
     "typescript": "^5.7.2",
     "unocss": "^0.65.1",
+    "vitest": "^4.1.9",
     "wxt": "^0.19.13"
   }
 }

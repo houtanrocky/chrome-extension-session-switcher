@@ -14,6 +14,15 @@ export default defineConfig({
     short_name: 'Sessions',
     description:
       'Run many accounts side by side on Claude, ChatGPT and any rate-limited site. Each tab gets its own isolated cookie jar + storage.',
+    // Toolbar button icon. WXT also auto-wires the top-level `icons` from
+    // public/icon/*.png (regenerate via `node scripts/gen-icons.mjs`); this
+    // pins the crisp small sizes Chrome uses for the action specifically.
+    action: {
+      default_icon: {
+        16: 'icon/16.png',
+        32: 'icon/32.png',
+      },
+    },
     // host_permissions are required so DNR can modify the Cookie header and
     // webRequest can read Set-Cookie for any site the user manages.
     host_permissions: ['<all_urls>'],

@@ -25,6 +25,17 @@ import * as store from './store';
 
 const PALETTE = ['#6c8cff', '#ff8f6c', '#4fcf8f', '#ffcf5c', '#c98cff', '#5cd0ff', '#ff6c9d', '#9aa1b2'];
 
+/** True when two URLs differ only by their hash (i.e. a same-document nav). */
+function sameDocument(a: string, b: string): boolean {
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    return ua.origin === ub.origin && ua.pathname === ub.pathname && ua.search === ub.search;
+  } catch {
+    return false;
+  }
+}
+
 export class SessionManager {
   private bindings = new Map<number, TabBinding>();
   private jars = new Map<string, CookieJar>();
@@ -124,9 +135,15 @@ export class SessionManager {
     const current = tab.url ?? '';
     const target =
       domainFromUrl(current) === session.domain ? current : `https://${session.domain}/`;
+    const marked = withNamespaceMarker(target, sessionId);
 
     await this.bind(tabId, session);
-    await chrome.tabs.update(tabId, { url: withNamespaceMarker(target, sessionId) });
+    await chrome.tabs.update(tabId, { url: marked });
+    // Appending the namespace hash to the *current* URL is a same-document
+    // navigation: it does NOT re-run the document_start storage shim, so the
+    // marker would never be read and web-storage isolation would silently stay
+    // off until a manual reload. Force a full reload in that case.
+    if (sameDocument(current, marked)) await chrome.tabs.reload(tabId);
   }
 
   private async bind(tabId: number, session: Session): Promise<void> {
