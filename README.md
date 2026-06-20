@@ -8,6 +8,13 @@ ten logins behave like ten independent browsers.
 
 Built with **WXT + Preact + UnoCSS**, TypeScript throughout, Manifest V3.
 
+**Browser support: Chromium only** — Chrome, Edge, Brave, Opera, Arc, and other
+Chromium browsers (verified equivalent across two Chromium versions via the E2E
+test). The isolation engine relies on Chromium's MV3 `declarativeNetRequest`
+session rules (per-tab `tabIds` conditions); Firefox lacks these, so it is not
+supported. On Firefox, native [container tabs](https://support.mozilla.org/kb/containers)
+already provide per-identity isolation.
+
 ---
 
 ## How it works

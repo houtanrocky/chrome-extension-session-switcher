@@ -37,7 +37,8 @@ namespace**.
   10-check real-Chrome end-to-end isolation test**. The E2E loads the built
   extension in real Chrome and proves: two accounts stay logged in concurrently
   and isolated, the browser's shared profile is never touched, and web storage
-  is namespaced per session. `npm test`, `npm run test:e2e`. See "Testing".
+  is namespaced per session. Verified on **two different Chromium builds**.
+  `npm test`, `npm run test:e2e`. See "Testing".
 - ⚠️ **Real AI sites not yet manually spot-checked.** The E2E proves the
   isolation *mechanism* in real Chrome (against a local fake-login server);
   ChatGPT/Claude with their own service workers / cross-origin SSO still warrant
@@ -56,6 +57,11 @@ namespace**.
   `chrome` API in `test/chromeMock.ts`) plus a real-browser **E2E** harness
   (`test/e2e.mjs`) with a local fake-login server.
 - Removed the WSL-only `scripts/*.sh` helpers; added `scripts/gen-icons.mjs`.
+- **Scoped support to Chromium only** (Chrome/Edge/Brave/Opera/Arc) and removed
+  the `dev:firefox` / `build:firefox` scripts. The E2E passes on two different
+  Chromium builds; the Firefox target compiled but can't function — Firefox has
+  no DNR session rules / `tabIds`, which *is* the per-tab cookie engine. (A real
+  Firefox port would use native contextual identities, a separate backend.)
 
 ## Architecture (how isolation actually works)
 
