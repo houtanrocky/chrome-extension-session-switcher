@@ -158,6 +158,32 @@ describe('importCurrentLogin', () => {
     expect(header).toContain('sid=real');
     expect(header).toContain('csrf=tok');
   });
+
+  it('never overwrites a session\'s own login (the cross-session footgun)', async () => {
+    const m = await freshManager();
+    const s = await m.createSession('claude.ai', 'hc');
+    const tabId = await m.openInSession(s.id);
+    // hc logs into its own account — captured into its jar.
+    fake.simulateResponse(tabId, 'https://claude.ai/api/auth', ['sid=HC_ACCOUNT; Path=/']);
+    await delay(120);
+    expect(cookieHeaderFor(tabId)).toBe('sid=HC_ACCOUNT');
+
+    // The shared browser profile still holds a DIFFERENT login ("hr") plus an
+    // unrelated cookie hc doesn't have — the exact state behind the bug report.
+    fake.setCookies([
+      { name: 'sid', value: 'HR_ACCOUNT', domain: 'claude.ai', path: '/', secure: true, httpOnly: true, sameSite: 'lax', hostOnly: true },
+      { name: 'pref', value: 'dark', domain: 'claude.ai', path: '/', secure: false, httpOnly: false, sameSite: 'lax', hostOnly: true },
+    ]);
+
+    const added = await m.importCurrentLogin(s.id, tabId);
+    await delay(120);
+
+    // hc keeps its OWN auth — import must not merge hr's identity in.
+    const header = cookieHeaderFor(tabId);
+    expect(header).toContain('sid=HC_ACCOUNT');
+    expect(header).not.toContain('HR_ACCOUNT');
+    expect(added).toBe(1); // only the genuinely-new 'pref' cookie was filled
+  });
 });
 
 describe('export / import round-trip', () => {

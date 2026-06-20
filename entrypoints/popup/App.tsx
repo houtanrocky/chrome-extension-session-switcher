@@ -152,14 +152,16 @@ export function App() {
 
         {bound && (
           <div class="flex gap-1.5">
-            <button
-              class="btn-ghost flex-1 justify-center text-xs"
-              disabled={busy}
-              title="Copy the browser's current login into this session"
-              onClick={() => run(() => sendMessage('importCurrentLogin', { sessionId: bound.id, tabId: ctx.tabId }))}
-            >
-              Import current login
-            </button>
+            {(ctx.jarSizes[bound.id] ?? 0) === 0 && (
+              <button
+                class="btn-ghost flex-1 justify-center text-xs"
+                disabled={busy}
+                title="One-time bootstrap: copy your normal (non-isolated) browser login for this site into this empty session. Hidden once the session has its own login — just log in instead."
+                onClick={() => run(() => sendMessage('importCurrentLogin', { sessionId: bound.id, tabId: ctx.tabId }))}
+              >
+                Adopt browser login
+              </button>
+            )}
             <button
               class="btn-danger flex-1 justify-center text-xs"
               disabled={busy}

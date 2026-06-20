@@ -67,8 +67,11 @@ swapped in without touching the UI.
   then **Open** (new isolated tab) or **Use here** (reload current tab into it).
 - Log in normally. The session now remembers that account.
 - Create more sessions and open each — they stay logged in concurrently.
-- **Import current login** copies the browser's existing real login into the
-  active session, so you don't have to re-authenticate the first account.
+- **Adopt browser login** (shown only while a bound session is *logged out*)
+  seeds the session from your normal, non-isolated login for the site — a
+  one-time bootstrap so you don't re-authenticate the first account. It only
+  fills cookies the session is missing, so it never overwrites a session's own
+  login (importing onto an already-logged-in session would merge identities).
 - **Manage all sessions** (full page) for rename / recolor / delete and
   **export / import** a JSON backup of all sessions + jars.
 

@@ -12,11 +12,11 @@ import { domainFromUrl, hostFromUrl, registrableDomain, siteName } from '../doma
 import { withNamespaceMarker, NS_SESSION_KEY } from '../shimProtocol';
 import {
   applyToJar,
+  fillRecord,
   fromChromeCookie,
   liveCount,
   parseSetCookie,
   pruneExpired,
-  putRecord,
   toCookieHeader,
 } from './cookieJar';
 import { applyTabRule, clearAllRules, clearTabRule } from './dnr';
@@ -186,12 +186,16 @@ export class SessionManager {
     const session = await this.requireSession(sessionId);
     const jar = await this.getJar(sessionId);
     const cookies = await chrome.cookies.getAll({ domain: session.domain });
-    for (const c of cookies) putRecord(jar, fromChromeCookie(c));
+    // Only fill cookies the session doesn't already have: importing the shared
+    // profile must never clobber a session's own login (that merged identities
+    // and made independent sessions collapse onto one account).
+    let added = 0;
+    for (const c of cookies) if (fillRecord(jar, fromChromeCookie(c))) added++;
 
     await store.saveJar(sessionId, jar);
     const binding = this.bindings.get(tabId);
     if (binding?.sessionId === sessionId) await this.refreshTab(binding);
-    return cookies.length;
+    return added;
   }
 
   // ---- Set-Cookie capture -------------------------------------------------

@@ -46,6 +46,14 @@ namespace**.
 
 ### Changes since the original handoff
 
+- **Fixed "import current login" merging identities across sessions.** It copies
+  the *shared* browser profile's login, so using it on a second (or already
+  logged-in) session pulled the first account's cookies in and overwrote the
+  session's own login → sessions collapsed onto one account. Now import only
+  *fills missing* cookies (`fillRecord`, never overwrites), the popup shows the
+  button (relabeled **"Adopt browser login"**) only while the session is logged
+  out, and `importCurrentLogin` returns the count actually added. Regression
+  test in `lib/engine/manager.test.ts`.
 - **Fixed service-worker cookie leakage** (reproduced on claude.ai: two sessions
   collapsed onto one account after a reload). Managed tabs now disable service
   workers — see "Known limitations" for the full mechanism + trade-off. Pinned
