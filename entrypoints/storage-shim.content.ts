@@ -87,8 +87,8 @@ function readHashMarker(): string | null {
  * A page's service worker is *per-origin* — one instance serves every tab of
  * that origin — and its network requests carry **no tab id**, so the per-tab
  * `declarativeNetRequest` cookie rule can never match them. A SW-driven site
- * (claude.ai, ChatGPT) would therefore route authenticated traffic through the
- * browser's shared profile and collapse every session onto one identity once
+ * (a chat app or webmail SPA, say) would therefore route authenticated traffic
+ * through the shared profile and collapse every session onto one identity once
  * its worker takes control (typically after the first reload). There is no way
  * to scope a single shared worker per session, so for isolated tabs we block
  * new registrations and tear down any worker left from a prior unmanaged visit,

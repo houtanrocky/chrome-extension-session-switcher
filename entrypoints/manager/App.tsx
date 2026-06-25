@@ -119,7 +119,7 @@ export function App() {
             <span class="text-xs text-muted">Site domain</span>
             <input
               class="input w-56"
-              placeholder="claude.ai"
+              placeholder="example.com"
               value={domainInput}
               onInput={(e) => setDomainInput((e.target as HTMLInputElement).value)}
               onKeyDown={(e) => e.key === 'Enter' && addSession()}

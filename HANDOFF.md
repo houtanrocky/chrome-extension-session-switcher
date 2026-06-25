@@ -6,7 +6,7 @@
 ## What this is
 
 A Manifest V3 Chrome extension that lets you run **many accounts side by side**
-on Claude, ChatGPT, Gemini, Perplexity, and any login-gated / rate-limited site,
+on any login-gated / rate-limited site (AI chats, webmail, dashboards, social),
 **concurrently in one window**. Each tab "opened in a session" gets its **own
 isolated cookie jar** and its **own `localStorage` / `sessionStorage` / IndexedDB
 namespace**.
@@ -39,9 +39,9 @@ namespace**.
   and isolated, the browser's shared profile is never touched, and web storage
   is namespaced per session. Verified on **two different Chromium builds**.
   `npm test`, `npm run test:e2e`. See "Testing".
-- ⚠️ **Real AI sites not yet manually spot-checked.** The E2E proves the
+- ⚠️ **Real third-party sites not yet manually spot-checked.** The E2E proves the
   isolation *mechanism* in real Chrome (against a local fake-login server);
-  ChatGPT/Claude with their own service workers / cross-origin SSO still warrant
+  heavy SPAs with their own service workers / cross-origin SSO still warrant
   a quick manual pass (see "Known limitations").
 
 ### Changes since the original handoff
@@ -54,7 +54,7 @@ namespace**.
   button (relabeled **"Adopt browser login"**) only while the session is logged
   out, and `importCurrentLogin` returns the count actually added. Regression
   test in `lib/engine/manager.test.ts`.
-- **Fixed service-worker cookie leakage** (reproduced on claude.ai: two sessions
+- **Fixed service-worker cookie leakage** (reproduced on a SW-driven SPA: two sessions
   collapsed onto one account after a reload). Managed tabs now disable service
   workers — see "Known limitations" for the full mechanism + trade-off. Pinned
   by a real-Chrome regression test, `test/e2e-sw.mjs`.
@@ -178,7 +178,7 @@ it in real Chrome, and drives a local fake-login server (no real accounts):
 - `test/e2e.mjs` — concurrent isolated logins (Alice vs Bob), the shared browser
   profile staying clean, and per-session web-storage namespacing.
 - `test/e2e-sw.mjs` — the **service-worker regression**: a site whose SW
-  intercepts requests must not break a managed tab's identity (the claude.ai
+  intercepts requests must not break a managed tab's identity (the SW-driven-SPA
   bug). Shared helpers live in `test/harness.mjs`.
 
 > The E2E needs a Chrome that still honours `--load-extension`. Regular Chrome
@@ -190,7 +190,7 @@ it in real Chrome, and drives a local fake-login server (no real accounts):
 ## Manual test plan (do this first in real Chrome)
 
 1. Load unpacked `.output/chrome-mv3` (or use `npm run dev`).
-2. Go to `chatgpt.com` (or `claude.ai`). Open popup → create session "A".
+2. Go to any login-gated site. Open popup → create session "A".
 3. Click **Open** → new tab loads logged-out. Log in as account 1.
 4. Back on the site, create session "B" → **Open** → log in as account 2.
 5. Both tabs should stay logged into different accounts **simultaneously**.
@@ -204,7 +204,7 @@ it in real Chrome, and drives a local fake-login server (no real accounts):
 
 ## Known limitations / things to watch when testing
 
-- **Site service workers — FIXED (was the #1 risk; reproduced on claude.ai).** A
+- **Site service workers — FIXED (was the #1 risk; reproduced on a SW-driven SPA).** A
   site's own SW issues requests with tabId == -1, which the per-tab DNR rule
   can't target, so a SW-driven SPA collapsed every session onto the shared
   profile once its worker took control (after the first reload). The storage
@@ -224,13 +224,13 @@ it in real Chrome, and drives a local fake-login server (no real accounts):
 - **Storage shim is invasive:** sites that grab `localStorage`/`indexedDB`
   references before `document_start`, or rely on `indexedDB instanceof
   IDBFactory` internals, may misbehave. Shim fails safe to native storage.
-- **Cross-origin SSO** (e.g. Google account for Gemini) isn't isolated by
+- **Cross-origin SSO** (e.g. a federated Google/Microsoft login) isn't isolated by
   domain-scoped cookies.
 
 ## Suggested next steps (priority order)
 
-1. **Manually spot-check the real AI sites** (the E2E already proves the
-   mechanism — see "Testing"). Log into two accounts on ChatGPT/Claude in two
+1. **Manually spot-check real third-party sites** (the E2E already proves the
+   mechanism — see "Testing"). Log into two accounts on a heavy SPA in two
    sessions and watch for **service-worker cookie leakage** and cross-origin
    SSO, the cases the local-server E2E can't exercise.
 2. ~~Add toolbar icons~~ ✅ done (see Status). Tweak the art in

@@ -9,11 +9,11 @@ import {
 
 describe('registrableDomain', () => {
   it('returns a bare two-label domain unchanged', () => {
-    expect(registrableDomain('claude.ai')).toBe('claude.ai');
+    expect(registrableDomain('example.com')).toBe('example.com');
   });
 
   it('collapses a subdomain to eTLD+1', () => {
-    expect(registrableDomain('chat.foo.claude.ai')).toBe('claude.ai');
+    expect(registrableDomain('chat.foo.example.com')).toBe('example.com');
   });
 
   it('keeps three labels for multi-part public suffixes', () => {
@@ -37,7 +37,7 @@ describe('registrableDomain', () => {
 
 describe('domainFromUrl', () => {
   it('extracts the registrable domain from an https URL', () => {
-    expect(domainFromUrl('https://chat.foo.claude.ai/projects?x=1')).toBe('claude.ai');
+    expect(domainFromUrl('https://chat.foo.example.com/projects?x=1')).toBe('example.com');
   });
 
   it('handles http and ports', () => {
@@ -60,7 +60,7 @@ describe('domainFromUrl', () => {
 
 describe('hostFromUrl', () => {
   it('returns the full hostname without port', () => {
-    expect(hostFromUrl('https://api.claude.ai:443/v1')).toBe('api.claude.ai');
+    expect(hostFromUrl('https://api.example.com:443/v1')).toBe('api.example.com');
   });
   it('returns null for junk', () => {
     expect(hostFromUrl('::::')).toBeNull();
@@ -70,8 +70,7 @@ describe('hostFromUrl', () => {
 
 describe('siteName', () => {
   it('uses the curated name for a known site', () => {
-    expect(siteName('claude.ai')).toBe('Claude');
-    expect(siteName('chatgpt.com')).toBe('ChatGPT');
+    expect(siteName('leetcode.com')).toBe('LeetCode');
     expect(siteName('notion.so')).toBe('Notion');
   });
 
@@ -83,7 +82,7 @@ describe('siteName', () => {
 
 describe('isKnownSite', () => {
   it('reflects the curated registry', () => {
-    expect(isKnownSite('claude.ai')).toBe(true);
+    expect(isKnownSite('leetcode.com')).toBe(true);
     expect(isKnownSite('example.com')).toBe(false);
   });
 });

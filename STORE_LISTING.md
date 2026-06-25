@@ -95,15 +95,17 @@ other company's trademark in the title (see the ⚠️ note below).
 | Option | Chars | Trade-off |
 |---|---|---|
 | `Session Switcher – Multi-Account Login & Container Tabs` ✅ | 55 | Best balance; trademark-safe. |
-| `Session Switcher – Multiple Accounts for AI & Any Site` | 54 | "AI" instead of brand names; still safe. |
-| `Session Switcher – Multiple Accounts for ChatGPT, Claude & More` | 62 | Highest search intent **but** ⚠️ higher rejection/trademark risk. |
+| `Session Switcher – Multiple Accounts for AI & Any Site` | 54 | "AI" category instead of brand names; still safe. |
 | `Session Switcher` | 16 | Cleanest, weakest for search. |
 
-> ⚠️ **Trademark caution.** Chrome regularly removes extensions that put
-> "ChatGPT", "Claude", "Gemini", etc. in the **name** (implied affiliation /
-> trademark policy). Keep brand names **out of the title** and use them
-> descriptively in the **description and screenshots** ("Works on ChatGPT,
-> Claude…") — that captures the search traffic with far less risk.
+> ⚠️ **Trademark / "violating content" caution — learned the hard way.** Chrome
+> rejects extensions that use third-party product names (specific AI brands,
+> etc.) in the listing — **not only in the name, but in the description and
+> screenshots too.** This listing was rejected once for exactly that (a chip
+> strip and a sentence enumerating ~10 AI products). Keep the whole listing
+> brand-name-free: describe what the tool *does* and the *categories* of site it
+> works on ("AI chats, webmail, dashboards") rather than naming any company's
+> product. Generic category language captures the search intent at far less risk.
 
 Keep `short_name` as a punchy fallback used in tight UI:
 
@@ -121,7 +123,7 @@ the top keyword (`multiple accounts`) in the first few words.
 **Recommended (120 chars):**
 
 ```
-Run multiple accounts side by side in one window — each tab gets isolated cookies & storage. ChatGPT, Claude & any site.
+Run multiple accounts side by side in one window — each tab gets isolated cookies & storage. Beat rate limits on any site.
 ```
 
 **Alternatives:**
@@ -151,7 +153,7 @@ Run many accounts at once — in ONE Chrome window.
 Session Switcher gives every tab its own isolated login, so you can stay signed into multiple accounts on the same website at the same time. No logging out, no incognito juggling, no separate Chrome profiles. It's like Firefox Container Tabs / Multi-Account Containers, built for Chrome.
 
 ★ PERFECT FOR
-• Running multiple ChatGPT, Claude, Gemini, Perplexity or Grok accounts together
+• Running multiple AI-chat accounts (work, personal, one per client) at once
 • Keeping work and personal logins on the same site open side by side
 • Freelancers & agencies juggling many client accounts at once
 • Testing web apps as different users (QA, dev, support)
@@ -175,7 +177,7 @@ Every session keeps its OWN:
 • Rename, color-code, and export / import all your sessions as a JSON backup.
 
 ★ WORKS EVERYWHERE
-Built and tested for AI tools — Claude, ChatGPT, Gemini, Perplexity, Grok, Poe, Copilot, DeepSeek, Mistral, Hugging Face — and works on virtually any login-gated site: social media, email, dashboards, support desks, and more.
+Built and tested on AI chat tools — and works on virtually any login-gated site: social media, email, dashboards, support desks, and more.
 
 ★ PRIVACY FIRST
 • 100% local. Your sessions and cookies are stored only on your own device.
@@ -185,7 +187,7 @@ Built and tested for AI tools — Claude, ChatGPT, Gemini, Perplexity, Grok, Poe
 ★ GOOD TO KNOW
 Session Switcher separates identities for convenience; it is not a security sandbox. To keep isolation airtight, managed tabs disable the site's service worker, so those tabs skip that site's offline cache and web push. Works on Chromium browsers only: Chrome, Edge, Brave, Opera, and Arc.
 
-Keywords: multiple accounts, multi account, account switcher, multi login, multi-session, container tabs, multi-account containers, separate cookies, multiple logins same site, profile switcher, multiple ChatGPT accounts, multiple Claude accounts.
+Keywords: multiple accounts, multi account, account switcher, multi login, multi-session, container tabs, multi-account containers, separate cookies, multiple logins same site, profile switcher, multiple accounts on one site, multi-account AI chat.
 ```
 
 > The trailing "Keywords:" line is optional. It modestly helps in-store search
@@ -218,7 +220,7 @@ Web Store ranking is driven, in rough order, by: **keyword match in the name** �
 `session switcher` · `container tabs` · `multiple logins same site`
 
 **Secondary (long-tail, high conversion):**
-`multiple ChatGPT accounts` · `multiple Claude accounts` · `multi account containers chrome` ·
+`multiple ai chat accounts` · `multi account containers chrome` ·
 `separate cookies per tab` · `multiple gmail logins` · `bypass rate limit` ·
 `switch accounts without logging out` · `multi-session browser`
 
@@ -247,8 +249,8 @@ Web Store ranking is driven, in rough order, by: **keyword match in the name** �
 
 - Add a Web Store badge + direct install link to your GitHub README.
 - **Show HN** / Hacker News, **Product Hunt** launch.
-- Subreddits: r/chrome_extensions, r/ChatGPT, r/ClaudeAI, r/productivity (read
-  each sub's self-promo rules first).
+- Subreddits: r/chrome_extensions, r/productivity, and relevant tool/AI
+  communities (read each sub's self-promo rules first).
 - A 20–30s demo GIF/video (also embeddable in the listing, see §6).
 
 ---
@@ -307,7 +309,7 @@ The **first** screenshot is the most important — it's the clearest value shot.
 | 2 | `screenshot-2-oneclick.png` | One click opens any account in its own isolated tab |
 | 3 | `screenshot-3-isolation.png` | Every session keeps its own cookies & storage |
 | 4 | `screenshot-4-manage.png` | Rename, color-code, export & import your sessions |
-| 5 | `screenshot-5-compat.png` | Works on ChatGPT, Claude, Gemini & any site |
+| 5 | `screenshot-5-compat.png` | Works on virtually any site you log into |
 
 To restyle: edit the `assets` array / `CSS` in the script and re-run. Concepts:
 
@@ -321,8 +323,9 @@ To restyle: edit the `assets` array / `CSS` in the script and re-run. Concepts:
    counts and color dots.
 4. **"Rename, color-code, export & import your sessions"**
    Manager page focused on the rename field + Export / Import buttons.
-5. **"Works on ChatGPT, Claude, Gemini, Perplexity & any site"**
-   A montage of two real AI tabs side by side, each a different account.
+5. **"Works on virtually any site you log into"**
+   A grid of generic site-category chips (AI chats, email, dashboards, support
+   desks…) — no third-party brand names or logos.
 
 Tips: large headline (≈48–64px) in `#e7e9ee` on `#0e0f13`, one idea per image,
 keep UI screenshots crisp at 100%, leave breathing room — they're shown small.
@@ -481,8 +484,10 @@ Then upload the zip from `.output/`. Confirm it contains `manifest.json` and the
 
 ## 12. Avoiding rejection
 
-- **No trademarks in the name** — keep ChatGPT/Claude/etc. in the description
-  only (§1).
+- **No third-party brand names anywhere** — not in the name, the description, OR
+  the screenshots. Naming specific AI products (or showing them as a chip strip)
+  triggered a "violating content" rejection; use generic category language and
+  placeholder domains (`example.com`) instead (§1).
 - **Permissions must match the listing** — every permission is justified in §7;
   don't add any you don't use.
 - **Honest screenshots** — show the real UI; no fake "10,000 users" or fabricated

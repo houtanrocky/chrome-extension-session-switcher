@@ -56,8 +56,8 @@ export function App() {
         <div class="p-5 flex flex-col items-center text-center gap-3">
           <Logo size={34} />
           <p class="text-sm text-muted leading-relaxed">
-            This page can't host sessions. Open an AI site like Claude or ChatGPT —
-            or any login-gated site — and try again.
+            This page can't host sessions. Open a login-gated site — webmail, a
+            dashboard, an AI chat — and try again.
           </p>
           <button class="btn-ghost w-full justify-center" onClick={openManager}>
             <span class="i-lucide-layout-grid" /> Open session manager

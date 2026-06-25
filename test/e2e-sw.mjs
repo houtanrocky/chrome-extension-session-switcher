@@ -1,5 +1,5 @@
 /**
- * Regression test for service-worker cookie leakage (the claude.ai bug).
+ * Regression test for service-worker cookie leakage (the SW-driven-SPA bug).
  *
  * A site that registers a service worker which intercepts requests is the worst
  * case for per-tab cookie isolation: once the SW controls the page, the app's
@@ -77,7 +77,7 @@ async function main() {
     check('baseline: managed tab is Alice via a direct request',
       (await page.evaluate(() => document.body.textContent)).trim() === 'Alice');
 
-    // Now make the site use a service worker, the way claude.ai does.
+    // Now make the site use a service worker, the way SW-driven SPAs do.
     await page.goto(`${base}/`, { waitUntil: 'load' });
     const swState = await page.evaluate(async () => {
       if (!navigator.serviceWorker) return { registered: false, reason: 'no container (disabled)' };
@@ -110,7 +110,7 @@ async function main() {
       (await plain.evaluate(() => document.body.textContent)).trim() === 'anonymous');
     await page.close();
 
-    // --- the real claude.ai trigger: a worker ALREADY active for the origin
+    // --- the real-world trigger: a worker ALREADY active for the origin
     //     (from a prior unmanaged visit) before the managed tab opens. The shim
     //     must unregister it and reload once to escape. ---
     await plain.goto(`${base}/`, { waitUntil: 'load' });

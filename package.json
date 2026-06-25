@@ -1,7 +1,7 @@
 {
   "name": "session-switcher",
   "version": "0.1.0",
-  "description": "Per-tab account isolation for AI sites (Claude, ChatGPT, …) and any rate-limited site. Run many logins side by side in one window.",
+  "description": "Per-tab account isolation for any login-gated or rate-limited site. Run many logins side by side in one window.",
   "type": "module",
   "private": true,
   "scripts": {

@@ -96,10 +96,9 @@ const page = (w, h, inner) =>
   `<div class="slide" style="width:${w}px;height:${h}px">${inner}</div>`;
 
 const SITES = [
-  ['Claude', C.orange], ['ChatGPT', C.success], ['Gemini', C.accent],
-  ['Perplexity', C.cyan], ['Grok', C.ink], ['Poe', C.purple],
-  ['Copilot', C.accent], ['DeepSeek', C.cyan], ['Mistral', C.orange],
-  ['Hugging Face', C.amber], ['Notion', C.ink], ['Figma', C.danger],
+  ['AI assistants', C.accent], ['Email & webmail', C.success], ['Social media', C.cyan],
+  ['Dashboards', C.purple], ['Support desks', C.orange], ['Admin panels', C.ink],
+  ['Dev tools', C.amber], ['Shopping carts', C.danger], ['Streaming', C.accent],
 ];
 
 // ---- the assets -----------------------------------------------------------
@@ -158,8 +157,8 @@ const assets = [
     html: page(1280, 800, `
       <div class="pad" style="flex-direction:column;align-items:center;justify-content:center;padding:70px;text-align:center">
         ${mark(52)}
-        <div class="h" style="font-size:50px;max-width:980px">Works on <span class="grad">ChatGPT, Claude, Gemini</span><br>&amp; virtually any site</div>
-        <div class="sub" style="margin:18px 0 40px;font-size:23px">Built for AI tools — and any login-gated website.</div>
+        <div class="h" style="font-size:50px;max-width:980px">Works on <span class="grad">virtually any site</span><br>you log into</div>
+        <div class="sub" style="margin:18px 0 40px;font-size:23px">From AI chats to email, dashboards &amp; support desks — any login-gated site.</div>
         <div class="chips">
           ${SITES.map(([n, c]) => `<span class="chip"><span class="d" style="background:${c}"></span>${n}</span>`).join('')}
           <span class="chip" style="border-style:dashed;color:${C.muted}">+ any site</span>

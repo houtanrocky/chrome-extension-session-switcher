@@ -10,7 +10,7 @@ import {
   liveCount,
 } from './cookieJar';
 
-const URL_ROOT = 'https://claude.ai/';
+const URL_ROOT = 'https://example.com/';
 
 describe('parseSetCookie', () => {
   it('parses a bare name=value as a host-only session cookie', () => {
@@ -20,7 +20,7 @@ describe('parseSetCookie', () => {
     expect(r!.record).toMatchObject({
       name: 'sid',
       value: 'abc123',
-      domain: 'claude.ai',
+      domain: 'example.com',
       path: '/',
       hostOnly: true,
       secure: false,
@@ -32,11 +32,11 @@ describe('parseSetCookie', () => {
 
   it('parses all standard attributes', () => {
     const r = parseSetCookie(
-      'sid=abc; Domain=claude.ai; Path=/app; Secure; HttpOnly; SameSite=Lax; Max-Age=3600',
-      'https://claude.ai/login',
+      'sid=abc; Domain=example.com; Path=/app; Secure; HttpOnly; SameSite=Lax; Max-Age=3600',
+      'https://example.com/login',
     )!;
     expect(r.record).toMatchObject({
-      domain: 'claude.ai',
+      domain: 'example.com',
       path: '/app',
       secure: true,
       httpOnly: true,
@@ -49,8 +49,8 @@ describe('parseSetCookie', () => {
   });
 
   it('strips a leading dot from Domain and treats it as not host-only', () => {
-    const r = parseSetCookie('a=b; Domain=.claude.ai', URL_ROOT)!;
-    expect(r.record.domain).toBe('claude.ai');
+    const r = parseSetCookie('a=b; Domain=.example.com', URL_ROOT)!;
+    expect(r.record.domain).toBe('example.com');
     expect(r.record.hostOnly).toBe(false);
   });
 
@@ -59,8 +59,8 @@ describe('parseSetCookie', () => {
   });
 
   it('derives the default path from the request (strips the last segment)', () => {
-    expect(parseSetCookie('a=b', 'https://claude.ai/foo/bar')!.record.path).toBe('/foo');
-    expect(parseSetCookie('a=b', 'https://claude.ai/foo')!.record.path).toBe('/');
+    expect(parseSetCookie('a=b', 'https://example.com/foo/bar')!.record.path).toBe('/foo');
+    expect(parseSetCookie('a=b', 'https://example.com/foo')!.record.path).toBe('/');
   });
 
   it('flags Max-Age=0 and past Expires as deletions', () => {
@@ -101,8 +101,8 @@ describe('applyToJar', () => {
 
   it('keys by name + domain + path so distinct scopes coexist', () => {
     const jar: CookieJar = {};
-    applyToJar(jar, parseSetCookie('a=root', 'https://claude.ai/')!);
-    applyToJar(jar, parseSetCookie('a=appval', 'https://claude.ai/app/x')!); // path /app
+    applyToJar(jar, parseSetCookie('a=root', 'https://example.com/')!);
+    applyToJar(jar, parseSetCookie('a=appval', 'https://example.com/app/x')!); // path /app
     expect(liveCount(jar)).toBe(2);
   });
 });
@@ -112,27 +112,27 @@ describe('toCookieHeader', () => {
     const jar: CookieJar = {};
     applyToJar(jar, parseSetCookie('sid=abc', URL_ROOT)!);
     applyToJar(jar, parseSetCookie('theme=dark', URL_ROOT)!);
-    const header = toCookieHeader(jar, 'claude.ai');
+    const header = toCookieHeader(jar, 'example.com');
     expect(header.split('; ').sort()).toEqual(['sid=abc', 'theme=dark']);
   });
 
   it('host-only cookies are not sent to subdomains; domain cookies are', () => {
     const jar: CookieJar = {};
-    applyToJar(jar, parseSetCookie('host=1', 'https://claude.ai/')!); // hostOnly
-    applyToJar(jar, parseSetCookie('dom=1; Domain=claude.ai', 'https://claude.ai/')!);
-    expect(toCookieHeader(jar, 'claude.ai')).toContain('host=1');
+    applyToJar(jar, parseSetCookie('host=1', 'https://example.com/')!); // hostOnly
+    applyToJar(jar, parseSetCookie('dom=1; Domain=example.com', 'https://example.com/')!);
+    expect(toCookieHeader(jar, 'example.com')).toContain('host=1');
     // For a subdomain host, only the Domain cookie applies.
-    expect(toCookieHeader(jar, 'api.claude.ai')).toBe('dom=1');
+    expect(toCookieHeader(jar, 'api.example.com')).toBe('dom=1');
   });
 
   it('excludes expired cookies', () => {
     const jar: CookieJar = {};
     putRecord(jar, {
-      name: 'stale', value: 'x', domain: 'claude.ai', path: '/',
+      name: 'stale', value: 'x', domain: 'example.com', path: '/',
       secure: false, httpOnly: false, sameSite: 'unspecified',
       expires: Date.now() - 1000, hostOnly: true,
     });
-    expect(toCookieHeader(jar, 'claude.ai')).toBe('');
+    expect(toCookieHeader(jar, 'example.com')).toBe('');
   });
 });
 
@@ -141,14 +141,14 @@ describe('pruneExpired + liveCount', () => {
     const jar: CookieJar = {};
     applyToJar(jar, parseSetCookie('live=1', URL_ROOT)!); // session cookie
     putRecord(jar, {
-      name: 'dead', value: 'x', domain: 'claude.ai', path: '/',
+      name: 'dead', value: 'x', domain: 'example.com', path: '/',
       secure: false, httpOnly: false, sameSite: 'unspecified',
       expires: Date.now() - 1, hostOnly: true,
     });
     expect(liveCount(jar)).toBe(1);
     expect(pruneExpired(jar)).toBe(true);
     expect(Object.keys(jar)).toHaveLength(1);
-    expect(toCookieHeader(jar, 'claude.ai')).toBe('live=1'); // the survivor
+    expect(toCookieHeader(jar, 'example.com')).toBe('live=1'); // the survivor
     expect(pruneExpired(jar)).toBe(false); // nothing left to prune
   });
 
@@ -160,12 +160,12 @@ describe('pruneExpired + liveCount', () => {
 describe('fromChromeCookie', () => {
   it('maps a chrome.cookies.Cookie into a record (seconds → ms)', () => {
     const rec = fromChromeCookie({
-      name: 'sid', value: 'v', domain: '.claude.ai', path: '/',
+      name: 'sid', value: 'v', domain: '.example.com', path: '/',
       secure: true, httpOnly: true, sameSite: 'lax', hostOnly: false,
       expirationDate: 2_000_000, session: false, storeId: '0',
     } as chrome.cookies.Cookie);
     expect(rec).toMatchObject({
-      name: 'sid', domain: 'claude.ai', secure: true, httpOnly: true,
+      name: 'sid', domain: 'example.com', secure: true, httpOnly: true,
       sameSite: 'lax', hostOnly: false, expires: 2_000_000_000,
     });
   });

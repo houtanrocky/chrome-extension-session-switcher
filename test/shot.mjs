@@ -8,13 +8,13 @@ import { writeFileSync } from 'node:fs';
 import { launch, extensionId, sleep } from './harness.mjs';
 
 const sessions = [
-  { id: 's1', domain: 'claude.ai', name: 'Work', color: '#6c8cff', createdAt: 0, updatedAt: 0 },
-  { id: 's2', domain: 'claude.ai', name: 'Personal', color: '#4fcf8f', createdAt: 0, updatedAt: 0 },
-  { id: 's3', domain: 'claude.ai', name: 'Client — Acme', color: '#ff8f6c', createdAt: 0, updatedAt: 0 },
+  { id: 's1', domain: 'example.com', name: 'Work', color: '#6c8cff', createdAt: 0, updatedAt: 0 },
+  { id: 's2', domain: 'example.com', name: 'Personal', color: '#4fcf8f', createdAt: 0, updatedAt: 0 },
+  { id: 's3', domain: 'example.com', name: 'Client — Acme', color: '#ff8f6c', createdAt: 0, updatedAt: 0 },
 ];
 const ctx = {
-  tabId: 1, url: 'https://claude.ai/', host: 'claude.ai', domain: 'claude.ai',
-  siteName: 'Claude', boundSessionId: 's2', sessions, jarSizes: { s1: 12, s2: 0, s3: 7 },
+  tabId: 1, url: 'https://example.com/', host: 'example.com', domain: 'example.com',
+  siteName: 'Example', boundSessionId: 's2', sessions, jarSizes: { s1: 12, s2: 0, s3: 7 },
 };
 const listAll = { sessions, jarSizes: { s1: 12, s2: 0, s3: 7 } };
 

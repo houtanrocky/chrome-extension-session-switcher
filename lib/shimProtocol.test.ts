@@ -17,13 +17,13 @@ describe('prefixes', () => {
 
 describe('withNamespaceMarker', () => {
   it('appends the marker as a URL hash', () => {
-    expect(withNamespaceMarker('https://claude.ai/', ID)).toBe(
-      `https://claude.ai/#${NS_HASH_PARAM}=${ID}`,
+    expect(withNamespaceMarker('https://example.com/', ID)).toBe(
+      `https://example.com/#${NS_HASH_PARAM}=${ID}`,
     );
   });
 
   it('preserves path and query', () => {
-    const out = withNamespaceMarker('https://claude.ai/chat?new=1', ID);
+    const out = withNamespaceMarker('https://example.com/chat?new=1', ID);
     const u = new URL(out);
     expect(u.pathname).toBe('/chat');
     expect(u.search).toBe('?new=1');
@@ -31,13 +31,13 @@ describe('withNamespaceMarker', () => {
   });
 
   it('replaces any pre-existing hash (markers must not stack)', () => {
-    const out = withNamespaceMarker('https://claude.ai/x#section', ID);
-    expect(out).toBe(`https://claude.ai/x#${NS_HASH_PARAM}=${ID}`);
+    const out = withNamespaceMarker('https://example.com/x#section', ID);
+    expect(out).toBe(`https://example.com/x#${NS_HASH_PARAM}=${ID}`);
   });
 
   it('round-trips through the same parse the shim uses', () => {
     // Mirror of readHashMarker() in the content script.
-    const out = withNamespaceMarker('https://claude.ai/a/b?c=d', ID);
+    const out = withNamespaceMarker('https://example.com/a/b?c=d', ID);
     const hash = new URL(out).hash.slice(1);
     const parsed = Object.fromEntries(
       hash.split('&').map((p) => {

@@ -1,10 +1,10 @@
 # Session Switcher
 
-Run **many accounts side by side** on Claude, ChatGPT, Gemini, Perplexity and
-basically any login-gated or rate-limited site — in a single browser window, at
-the same time. Each tab you "open in a session" gets its **own isolated cookie
-jar and its own `localStorage` / `sessionStorage` / IndexedDB namespace**, so
-ten logins behave like ten independent browsers.
+Run **many accounts side by side** on basically any login-gated or rate-limited
+site — AI chats, webmail, dashboards, social, support desks — in a single
+browser window, at the same time. Each tab you "open in a session" gets its
+**own isolated cookie jar and its own `localStorage` / `sessionStorage` /
+IndexedDB namespace**, so ten logins behave like ten independent browsers.
 
 Built with **WXT + Preact + UnoCSS**, TypeScript throughout, Manifest V3.
 
@@ -125,9 +125,9 @@ select `.output/chrome-mv3`.
   this, **managed tabs disable service workers** (registration is blocked and
   any existing worker is unregistered). The cost: managed tabs don't get that
   site's offline cache or web push. Unmanaged tabs are unaffected.
-- **Cross-origin SSO.** Logins that depend on a *separate* identity domain
-  (e.g. Google account for Gemini) aren't isolated by domain-scoped cookies and
-  may behave inconsistently.
+- **Cross-origin SSO.** Logins that depend on a *separate* identity provider
+  (e.g. a federated Google/Microsoft login) aren't isolated by domain-scoped
+  cookies and may behave inconsistently.
 - **Storage shim is best-effort.** Overriding `localStorage`/`indexedDB` is
   inherently invasive; a site that captures references before `document_start`,
   or relies on `indexedDB instanceof IDBFactory` internals, may misbehave. The

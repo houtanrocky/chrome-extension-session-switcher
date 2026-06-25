@@ -21,7 +21,7 @@ coordinated by a single background orchestrator (`SessionManager`):
 Two definitions used throughout:
 
 - A **session** is a named identity scoped to one *registrable domain* (e.g.
-  "Work" on `claude.ai`). It owns an isolated cookie jar and storage namespace.
+  "Work" on `example.com`). It owns an isolated cookie jar and storage namespace.
 - A tab can be **bound** to a session. While bound, that tab's network traffic
   and web storage use the session's data instead of the browser's shared
   profile. Binding is ephemeral (per browser run); sessions are durable.
@@ -31,7 +31,7 @@ Two definitions used throughout:
 ## The problem
 
 A normal browser profile has exactly one cookie jar per origin. Open
-`claude.ai` in two tabs and they share cookies — log into account B in one and
+`example.com` in two tabs and they share cookies — log into account B in one and
 the other becomes account B too. Firefox solves this with *contextual
 identities* (container tabs) that give each container its own cookie store keyed
 by `cookieStoreId`. Chromium exposes no such primitive to extensions, so the
@@ -246,7 +246,7 @@ Binding state is also reconciled on `tabs.onRemoved` and on every SW startup
 | Service workers | ✅ neutralized in managed tabs | registration blocked + existing unregistered |
 | `document.cookie` (JS-set cookies) | ⚠️ **shared** | not intercepted — reads/writes hit the real per-origin jar. Server-side auth (httpOnly cookies) is unaffected since those flow through the DNR-controlled header; but non-httpOnly cookies are visible across sessions |
 | Cache Storage (`caches`) | ⚠️ shared | per-origin; not namespaced (mostly mooted by disabling SWs) |
-| Cross-origin SSO (a *separate* identity domain, e.g. Google for Gemini) | ⚠️ not isolated | only the site's own registrable domain is rewritten |
+| Cross-origin SSO (a *separate* identity provider, e.g. a federated Google/Microsoft login) | ⚠️ not isolated | only the site's own registrable domain is rewritten |
 | HTTP auth, TLS client certs, `Authorization` tokens in JS memory | ❌ out of scope | not a cookie/storage channel |
 
 **Path-scoped cookies** are sent coarsely (the whole domain jar per request) and
