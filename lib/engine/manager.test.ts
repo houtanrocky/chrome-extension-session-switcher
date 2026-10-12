@@ -70,9 +70,12 @@ describe('rule recovery', () => {
 });
 /** The DNR-injected Cookie header for a tab ('' when the rule removes it). */
 function cookieHeaderFor(tabId: number): string {
-  const rule = fake.ruleFor(tabId);
-  const action = rule?.action.requestHeaders?.[0];
-  return action?.operation === 'set' ? (action.value ?? '') : '';
+  for (const rule of fake.state.sessionRules.values()) {
+    if (!rule.condition.tabIds?.includes(tabId)) continue;
+    const action = rule.action.requestHeaders?.[0];
+    if (action?.operation === 'set') return action.value ?? '';
+  }
+  return '';
 }
 
 describe('session CRUD', () => {
@@ -159,6 +162,19 @@ describe('Set-Cookie capture → per-tab isolation', () => {
     expect(cookieHeaderFor(tabId)).toBe('sid=ACCOUNT_A');
     const { jarSizes } = await m.listAllSessions();
     expect(jarSizes[s.id]).toBe(1);
+  });
+
+  it('keeps a cross-subdomain SSO login in the session header', async () => {
+    const m = await freshManager();
+    const s = await m.createSession('digikala.com', 'QA');
+    const tabId = await m.openInSession(s.id, 'https://auth.digikala.com/login');
+
+    fake.simulateResponse(tabId, 'https://auth.digikala.com/realms/login', [
+      'KEYCLOAK_SESSION=abc; Path=/; Secure; HttpOnly',
+    ]);
+    await delay(120);
+
+    expect(cookieHeaderFor(tabId)).toContain('KEYCLOAK_SESSION=abc');
   });
 
   it('keeps two concurrent sessions on the same site fully separate', async () => {

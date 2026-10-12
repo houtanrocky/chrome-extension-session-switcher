@@ -40,6 +40,7 @@ export default defineContentScript({
     // requests would bypass the per-tab cookie rule — see below).
     disableServiceWorkers(realSession);
 
+    installDocumentCookieBridge();
     const prefix = storagePrefix(sessionId);
     installNamespacedStorage('localStorage', realLocal, prefix);
     installNamespacedStorage('sessionStorage', realSession, prefix);
@@ -63,6 +64,31 @@ function resolveSessionId(realSession: Storage): string | null {
     return realSession.getItem(NS_SESSION_KEY);
   } catch {
     return null;
+  }
+}
+
+/** Forward JavaScript-set cookies to the isolated content bridge. */
+function installDocumentCookieBridge(): void {
+  let proto: object | null = Object.getPrototypeOf(document);
+  let descriptor: PropertyDescriptor | undefined;
+  while (proto && !descriptor) {
+    descriptor = Object.getOwnPropertyDescriptor(proto, 'cookie');
+    proto = Object.getPrototypeOf(proto);
+  }
+  if (!descriptor?.get || !descriptor.set) return;
+  try {
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get: () => descriptor.get!.call(document),
+      set: (value: string) => {
+        descriptor.set!.call(document, value);
+        window.dispatchEvent(new CustomEvent('session-switcher-cookie', {
+          detail: { url: location.href, cookie: value },
+        }));
+      },
+    });
+  } catch {
+    /* Some locked-down pages do not allow replacing document.cookie. */
   }
 }
 

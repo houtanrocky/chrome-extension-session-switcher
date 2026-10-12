@@ -125,6 +125,17 @@ describe('toCookieHeader', () => {
     expect(toCookieHeader(jar, 'api.example.com')).toBe('dom=1');
   });
 
+  it('keeps host-only cookies scoped to their concrete subdomain', () => {
+    const jar: CookieJar = {};
+    applyToJar(jar, parseSetCookie('auth_session=abc', 'https://auth.digikala.com/realms/login')!);
+    applyToJar(jar, parseSetCookie('site_session=xyz', 'https://www.digikala.com/')!);
+
+    expect(toCookieHeader(jar, 'digikala.com')).toBe('');
+    expect(toCookieHeader(jar, 'auth.digikala.com', '/realms/login')).toContain('auth_session=abc');
+    expect(toCookieHeader(jar, 'www.digikala.com')).toContain('site_session=xyz');
+    expect(toCookieHeader(jar, 'www.digikala.com')).not.toContain('auth_session=abc');
+  });
+
   it('excludes expired cookies', () => {
     const jar: CookieJar = {};
     putRecord(jar, {
@@ -133,6 +144,17 @@ describe('toCookieHeader', () => {
       expires: Date.now() - 1000, hostOnly: true,
     });
     expect(toCookieHeader(jar, 'example.com')).toBe('');
+  });
+
+  it('matches cookie paths like the browser', () => {
+    const jar: CookieJar = {};
+    applyToJar(jar, parseSetCookie('root=1; Path=/', URL_ROOT)!);
+    applyToJar(jar, parseSetCookie('login=1; Path=/login', URL_ROOT)!);
+    applyToJar(jar, parseSetCookie('login2=1; Path=/login/form', URL_ROOT)!);
+    expect(toCookieHeader(jar, 'example.com', '/login/form')).toContain('root=1');
+    expect(toCookieHeader(jar, 'example.com', '/login/form')).toContain('login=1');
+    expect(toCookieHeader(jar, 'example.com', '/login/form')).toContain('login2=1');
+    expect(toCookieHeader(jar, 'example.com', '/logout')).toBe('root=1');
   });
 });
 
@@ -158,7 +180,7 @@ describe('pruneExpired + liveCount', () => {
 });
 
 describe('fromChromeCookie', () => {
-  it('maps a chrome.cookies.Cookie into a record (seconds → ms)', () => {
+  it('maps a chrome.cookies.Cookie into a record (seconds â†’ ms)', () => {
     const rec = fromChromeCookie({
       name: 'sid', value: 'v', domain: '.example.com', path: '/',
       secure: true, httpOnly: true, sameSite: 'lax', hostOnly: false,

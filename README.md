@@ -33,10 +33,11 @@ isolation is assembled from two independent mechanisms:
 
 ### 1. Per-tab cookie isolation (network layer)
 
-- **`declarativeNetRequest`** installs one session-scoped rule per managed tab
-  (`tabIds` condition). It **sets the outgoing `Cookie` header** to that
-  session's jar and **strips incoming `Set-Cookie`** so the browser's shared
-  profile is never touched.
+- **`declarativeNetRequest`** installs session-scoped rules per managed tab and
+  cookie host (`tabIds` and `requestDomains` conditions). Each rule **sets the
+  outgoing `Cookie` header** only for that host and **strips incoming
+  `Set-Cookie`**, so cross-subdomain SSO works without sending every subdomain's
+  cookies on every request.
 - **`webRequest.onHeadersReceived`** (observe-only, `extraHeaders`) reads
   `Set-Cookie` off responses and folds them back into the session's jar, then
   refreshes the DNR rule. This is the read/write loop that keeps each session
@@ -144,8 +145,8 @@ select `.output/chrome-mv3`.
   inherently invasive; a site that captures references before `document_start`,
   or relies on `indexedDB instanceof IDBFactory` internals, may misbehave. The
   shim fails safe (native storage) rather than breaking the page.
-- **Path-scoped cookies** are sent coarsely (whole domain jar per request) since
-  the goal is identity isolation, not byte-exact cookie semantics.
+- **Path-scoped cookies** are matched to the request path, reducing oversized
+  `Cookie` headers on sites that use many scoped cookies.
 - **Shared quota.** Key-prefixing means all sessions on one origin share that
   origin's `localStorage` quota.
 

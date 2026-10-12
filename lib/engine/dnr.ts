@@ -1,78 +1,93 @@
 /**
- * declarativeNetRequest rule manager.
+ * Declarative Net Request rules for per-tab cookie isolation.
  *
- * For each managed tab we install exactly one *session-scoped* rule (id ===
- * tabId, which is unique among live tabs). The rule:
- *   - sets the outgoing `Cookie` header to the session jar's value for the
- *     tab's domain (or removes it entirely when the jar is empty => logged out),
- *   - removes incoming `Set-Cookie` so the browser's shared jar stays clean.
- *
- * `tabIds` conditions are only valid on session rules, which conveniently also
- * survive service-worker restarts and auto-clear on browser restart.
+ * A session can span several subdomains. We install one rule for the base
+ * domain and one host-specific rule for every cookie host in the session jar.
+ * This keeps auth.example.com cookies out of www.example.com requests while
+ * still supporting SSO redirects between subdomains without oversized headers.
  */
+import type { CookieJar } from '../types';
+import { toCookieHeader } from './cookieJar';
 
 const RT = chrome.declarativeNetRequest.ResourceType;
 const RESOURCE_TYPES: chrome.declarativeNetRequest.ResourceType[] = [
-  RT.MAIN_FRAME,
-  RT.SUB_FRAME,
-  RT.XMLHTTPREQUEST,
-  RT.SCRIPT,
-  RT.IMAGE,
-  RT.STYLESHEET,
-  RT.FONT,
-  RT.MEDIA,
-  RT.PING,
-  RT.OTHER,
+  RT.MAIN_FRAME, RT.SUB_FRAME, RT.XMLHTTPREQUEST, RT.SCRIPT, RT.IMAGE,
+  RT.STYLESHEET, RT.FONT, RT.MEDIA, RT.PING, RT.OTHER,
 ];
 
-/** One rule per tab; the tab id doubles as the rule id. */
-function ruleId(tabId: number): number {
-  return tabId;
+function regexForPath(path: string): string | undefined {
+  if (path === '/') return undefined;
+  const escaped = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return `^https?://[^/]+${escaped}(?:[/?#]|$)`;
 }
 
-export async function applyTabRule(
-  tabId: number,
-  domain: string,
-  cookieHeader: string,
-): Promise<void> {
+export async function applyTabRule(tabId: number, domain: string, jar: CookieJar): Promise<void> {
   const Op = chrome.declarativeNetRequest.HeaderOperation;
-  const cookieAction: chrome.declarativeNetRequest.ModifyHeaderInfo = cookieHeader
-    ? { header: 'cookie', operation: Op.SET, value: cookieHeader }
-    : { header: 'cookie', operation: Op.REMOVE };
+  const hosts = new Set<string>([domain]);
+  for (const cookie of Object.values(jar)) {
+    const host = cookie.domain.replace(/^\./, '').toLowerCase();
+    if (host === domain || host.endsWith('.' + domain)) hosts.add(host);
+  }
 
-  const rule: chrome.declarativeNetRequest.Rule = {
-    id: ruleId(tabId),
-    priority: 1,
-    condition: {
-      tabIds: [tabId],
-      requestDomains: [domain],
-      resourceTypes: RESOURCE_TYPES,
-    },
-    action: {
-      type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-      requestHeaders: [cookieAction],
-      responseHeaders: [{ header: 'set-cookie', operation: Op.REMOVE }],
-    },
+  const existing = await chrome.declarativeNetRequest.getSessionRules();
+  const oldIds = new Set(
+    existing.filter((rule) => rule.condition.tabIds?.includes(tabId)).map((rule) => rule.id),
+  );
+  const usedIds = new Set(existing.filter((rule) => !oldIds.has(rule.id)).map((rule) => rule.id));
+  let nextId = 1_000_000;
+  const allocateId = () => {
+    while (usedIds.has(nextId)) nextId++;
+    usedIds.add(nextId);
+    return nextId++;
   };
+  const rules: chrome.declarativeNetRequest.Rule[] = [];
+  for (const host of [...hosts].sort()) {
+    const paths = new Set<string>(['/']);
+    for (const cookie of Object.values(jar)) {
+      const cookieHost = cookie.domain.replace(/^\./, '').toLowerCase();
+      const appliesToHost = cookieHost === host || (!cookie.hostOnly && host.endsWith('.' + cookieHost));
+      if (appliesToHost && (cookieHost === domain || cookieHost.endsWith('.' + domain))) {
+        paths.add(cookie.path || '/');
+      }
+    }
+    for (const path of [...paths].sort((a, b) => a.length - b.length)) {
+      const cookieHeader = toCookieHeader(jar, host, path);
+      const cookieAction: chrome.declarativeNetRequest.ModifyHeaderInfo = cookieHeader
+        ? { header: 'cookie', operation: Op.SET, value: cookieHeader }
+        : { header: 'cookie', operation: Op.REMOVE };
+      rules.push({
+        id: allocateId(),
+        priority: path.length * 10 + (host === domain ? 1 : 2),
+        condition: {
+          tabIds: [tabId], requestDomains: [host], resourceTypes: RESOURCE_TYPES,
+          ...(regexForPath(path) ? { regexFilter: regexForPath(path) } : {}),
+        },
+        action: {
+          type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+          requestHeaders: [cookieAction],
+          responseHeaders: [{ header: 'set-cookie', operation: Op.REMOVE }],
+        },
+      });
+    }
+  }
 
-  await chrome.declarativeNetRequest.updateSessionRules({
-    removeRuleIds: [ruleId(tabId)],
-    addRules: [rule],
-  });
+  await chrome.declarativeNetRequest.updateSessionRules({ removeRuleIds: [...oldIds], addRules: rules });
 }
 
 export async function clearTabRule(tabId: number): Promise<void> {
+  const existing = await chrome.declarativeNetRequest.getSessionRules();
   await chrome.declarativeNetRequest.updateSessionRules({
-    removeRuleIds: [ruleId(tabId)],
+    removeRuleIds: existing
+      .filter((rule) => rule.condition.tabIds?.includes(tabId))
+      .map((rule) => rule.id),
   });
 }
 
-/** Remove every rule we own — used when wiping all bindings. */
 export async function clearAllRules(): Promise<void> {
   const existing = await chrome.declarativeNetRequest.getSessionRules();
   if (existing.length) {
     await chrome.declarativeNetRequest.updateSessionRules({
-      removeRuleIds: existing.map((r) => r.id),
+      removeRuleIds: existing.map((rule) => rule.id),
     });
   }
 }

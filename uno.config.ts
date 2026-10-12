@@ -41,6 +41,6 @@ export default defineConfig({
     card: 'bg-panel border border-line rounded-xl',
     badge: 'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide',
     input:
-      'w-full bg-panel2 border border-line rounded-lg px-2.5 py-1.5 text-sm text-ink placeholder-faint outline-none transition-colors focus:border-accent focus:bg-[#20232d]',
+      'box-border w-full max-w-full min-w-0 bg-panel2 border border-line rounded-lg px-2.5 py-1.5 text-sm text-ink placeholder-faint outline-none transition-colors focus:border-accent focus:bg-[#20232d]',
   },
 });
