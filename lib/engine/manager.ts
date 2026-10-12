@@ -52,7 +52,9 @@ export class SessionManager {
 
     await this.hydrate();
     // Re-assert DNR rules in case the browser session was reset under us.
-    for (const b of this.bindings.values()) await this.refreshTab(b);
+    for (const b of this.bindings.values()) {
+      await this.refreshTab(b).catch((err) => console.error('[session-switcher] rule restore failed', err));
+    }
   }
 
   private async hydrate(): Promise<void> {
@@ -228,7 +230,9 @@ export class SessionManager {
       setTimeout(() => {
         this.refreshTimers.delete(sessionId);
         for (const b of this.bindings.values()) {
-          if (b.sessionId === sessionId) void this.refreshTab(b);
+          if (b.sessionId === sessionId) {
+            void this.refreshTab(b).catch((err) => console.error('[session-switcher] rule refresh failed', err));
+          }
         }
       }, 60),
     );
@@ -237,13 +241,23 @@ export class SessionManager {
   private async refreshTab(binding: TabBinding): Promise<void> {
     const jar = await this.getJar(binding.sessionId);
     if (pruneExpired(jar)) await store.saveJar(binding.sessionId, jar);
-    const header = toCookieHeader(jar, binding.domain);
-    try {
-      await applyTabRule(binding.tabId, binding.domain, header);
-    } catch {
-      // Tab closed between lookup and apply — drop the stale binding.
-      this.bindings.delete(binding.tabId);
-      await store.removeBinding(binding.tabId);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (this.bindings.get(binding.tabId) !== binding) return;
+      try {
+        await applyTabRule(binding.tabId, binding.domain, toCookieHeader(jar, binding.domain));
+        return;
+      } catch (err) {
+        // A DNR error does not imply a closed tab. Preserve its identity and
+        // existing rule while retrying. Confirm absence before dropping it.
+        const tabs = await chrome.tabs.query({});
+        if (!tabs.some((tab) => tab.id === binding.tabId)) {
+          this.bindings.delete(binding.tabId);
+          await store.removeBinding(binding.tabId);
+          return;
+        }
+        if (attempt === 2) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+      }
     }
   }
 

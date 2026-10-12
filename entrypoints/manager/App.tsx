@@ -97,7 +97,7 @@ export function App() {
             <div>
               <h1 class="text-xl font-semibold leading-tight">Session Switcher</h1>
               <p class="text-sm text-muted leading-tight">
-                Every session keeps its own cookies + storage — open as many as you like, side by side.
+                Test Admin, Standard user, and Guest accounts side by side with separate cookies and storage.
               </p>
             </div>
           </div>
@@ -114,6 +114,10 @@ export function App() {
           </div>
         </header>
 
+        <p class="text-sm text-muted mb-4">
+          Create a session, choose Open new tab, then log in. Repeat for another user on the same site.
+          Sessions are grouped by site; reconnect restored tabs after restarting the browser.
+        </p>
         <div class="card p-3.5 mb-7 flex flex-wrap items-end gap-2.5">
           <label class="flex flex-col gap-1">
             <span class="text-xs text-muted">Site domain</span>
@@ -129,7 +133,7 @@ export function App() {
             <span class="text-xs text-muted">Session name</span>
             <input
               class="input w-56"
-              placeholder="Work"
+              placeholder="e.g. Admin"
               value={nameInput}
               onInput={(e) => setNameInput((e.target as HTMLInputElement).value)}
               onKeyDown={(e) => e.key === 'Enter' && addSession()}
@@ -223,12 +227,12 @@ function SessionRow(props: {
           </span>
         ) : (
           <span class="inline-flex items-center gap-1 text-xs text-faint">
-            <span class="i-lucide-circle-dashed text-[13px]" /> logged out
+            <span class="i-lucide-circle-dashed text-[13px]" /> no cookies
           </span>
         )}
       </span>
       <button class="btn-ghost text-xs" disabled={busy} onClick={props.onOpen}>
-        <span class="i-lucide-external-link" /> Open
+        <span class="i-lucide-external-link" /> Open new tab
       </button>
       <button class="btn-icon text-danger hover:text-danger hover:bg-[#ff7a7a1a]" disabled={busy} title="Delete session" onClick={props.onDelete}>
         <span class="i-lucide-trash-2 text-[15px]" />

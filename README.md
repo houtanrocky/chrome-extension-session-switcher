@@ -1,12 +1,21 @@
 # Session Switcher
 
-Run **many accounts side by side** on basically any login-gated or rate-limited
-site — AI chats, webmail, dashboards, social, support desks — in a single
-browser window, at the same time. Each tab you "open in a session" gets its
-**own isolated cookie jar and its own `localStorage` / `sessionStorage` /
-IndexedDB namespace**, so ten logins behave like ten independent browsers.
+Test **multiple user accounts side by side** in one browser window. Create
+sessions such as Admin, Standard user, and Guest to compare roles and permissions
+in your web application. Each managed tab uses a session's cookie jar and
+`localStorage` / `sessionStorage` / IndexedDB namespace. Sessions are grouped by
+site; cross-domain SSO and some browser storage mechanisms have limitations.
+
+See [what changed](CHANGELOG.md) and the [manual QA checklist](docs/QA_RELEASE_CHECKLIST.md).
+
+Chrome Web Store submission copy is split into paste-ready files in
+[`store-listing/`](store-listing/), including the title, summary, description,
+privacy and permission disclosures, screenshot captions, release notes, support
+replies, SEO guidance, and the publication checklist.
 
 Built with **WXT + Preact + UnoCSS**, TypeScript throughout, Manifest V3.
+
+**[Project homepage](https://houtan-rocky.github.io/chrome-extension-session-switcher/)** · **[Chrome Web Store](https://chromewebstore.google.com/search/Session%20Switcher)** · **[Report an issue](https://github.com/houtan-rocky/chrome-extension-session-switcher/issues)**
 
 **Browser support: Chromium only** — Chrome, Edge, Brave, Opera, Arc, and other
 Chromium browsers (verified equivalent across two Chromium versions via the E2E
@@ -68,10 +77,13 @@ swapped in without touching the UI.
 
 ## Using it
 
-- Click the toolbar icon on any site → **create a session** (e.g. "Work"),
-  then **Open** (new isolated tab) or **Use here** (reload current tab into it).
+- Click the toolbar icon on your web app → **Create session** (e.g. "Admin"),
+  then **Open new tab** or **Use this tab** (reload the current tab into it).
 - Log in normally. The session now remembers that account.
-- Create more sessions and open each — they stay logged in concurrently.
+- Choose **Create another session**, name it "Standard user", open it, and log
+  into the second account. Compare both users side by side.
+- Sessions belong to a site/domain. After restarting the browser, reconnect
+  restored tabs before using them: tab attachments and network rules reset.
 - **Adopt browser login** (shown only while a bound session is *logged out*)
   seeds the session from your normal, non-isolated login for the site — a
   one-time bootstrap so you don't re-authenticate the first account. It only

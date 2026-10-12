@@ -5,7 +5,8 @@ export default defineBackground(() => {
   const manager = new SessionManager();
 
   // Kick off init eagerly; handlers also tolerate a cold cache via hydrate().
-  const ready = manager.init().catch((err) => console.error('[session-switcher] init failed', err));
+  const ready = manager.init();
+  void ready.catch((err) => console.error('[session-switcher] init failed', err));
 
   registerHandlers({
     getContext: async ({ tabId }) => {
@@ -47,5 +48,5 @@ export default defineBackground(() => {
     importData: async ({ backup, merge }) => ({
       sessions: await manager.importData(backup, merge),
     }),
-  });
+  }, ready);
 });

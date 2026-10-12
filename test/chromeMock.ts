@@ -92,7 +92,8 @@ export function makeChrome() {
         if (!t) throw new Error(`No tab ${tabId}`);
         return { ...t };
       },
-      query: async () => {
+      query: async (query: { active?: boolean } = {}) => {
+        if (!query.active) return [...tabs.values()].map((tab) => ({ ...tab }));
         const active = [...tabs.values()].find((t) => t.active);
         return active ? [{ ...active }] : [];
       },

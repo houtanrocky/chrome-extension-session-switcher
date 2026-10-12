@@ -1,0 +1,73 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Session Switcher | Multi-Session Testing for Chrome</title>
+    <meta name="description" content="Test multiple user accounts side by side in Chrome. Session Switcher gives QA teams separate cookies and web storage for Admin, Standard user, and Guest workflows.">
+    <meta name="keywords" content="multi-session testing, QA testing, multiple user accounts, role-based access testing, separate cookies per tab">
+    <meta name="author" content="Houtan Rocky">
+    <meta name="theme-color" content="#0b1020">
+    <link rel="canonical" href="https://houtan-rocky.github.io/chrome-extension-session-switcher/">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://houtan-rocky.github.io/chrome-extension-session-switcher/">
+    <meta property="og:title" content="Session Switcher | Multi-Session Testing for Chrome">
+    <meta property="og:description" content="Compare Admin, Standard user, and Guest accounts side by side while testing your web app.">
+    <meta property="og:image" content="https://houtan-rocky.github.io/chrome-extension-session-switcher/assets/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Session Switcher | Multi-Session Testing for Chrome">
+    <meta name="twitter:description" content="Test multiple user accounts side by side with separate cookies and storage.">
+    <meta name="twitter:image" content="https://houtan-rocky.github.io/chrome-extension-session-switcher/assets/og-image.png">
+    <link rel="icon" href="assets/icon.png">
+    <link rel="stylesheet" href="site.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Session Switcher",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Chrome, Edge, Brave, Opera, Arc",
+        "description": "A Chromium extension for testing multiple user accounts side by side with separate session cookies and web storage.",
+        "url": "https://houtan-rocky.github.io/chrome-extension-session-switcher/",
+        "downloadUrl": "https://chromewebstore.google.com/search/Session%20Switcher",
+        "isAccessibleForFree": true,
+        "author": { "@type": "Person", "name": "Houtan Rocky" },
+        "codeRepository": "https://github.com/houtan-rocky/chrome-extension-session-switcher"
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Session Switcher home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Session Switcher</span></a>
+      <nav aria-label="Main navigation"><a href="#workflow">Workflow</a><a href="#qa">For QA</a><a href="#limits">Boundaries</a><a class="nav-cta" href="https://chromewebstore.google.com/search/Session%20Switcher">Find it in Chrome Web Store</a></nav>
+    </header>
+
+    <main id="top">
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="pulse"></span> Multi-session testing for Chromium</p>
+          <h1>Test your app as <em>every user</em> in one browser window.</h1>
+          <p class="lede">Keep Admin, Standard user, Guest, and support accounts open side by side. Session Switcher gives each managed tab its own cookies and web storage, so QA teams can compare real user journeys without logging in and out.</p>
+          <div class="actions"><a class="button primary" href="https://chromewebstore.google.com/search/Session%20Switcher">Add to Chrome <span aria-hidden="true">â†—</span></a><a class="button secondary" href="https://github.com/houtan-rocky/chrome-extension-session-switcher">Read the source <span aria-hidden="true">â†—</span></a></div>
+          <p class="microcopy">Free, local-first, open source. Chromium browsers only.</p>
+        </div>
+        <div class="hero-art" aria-label="Illustration of three isolated test sessions"><div class="glow"></div><div class="window-card back"><span class="window-bar"></span><b>Guest</b><small>anonymous flow</small></div><div class="window-card middle"><span class="window-bar"></span><b>Standard user</b><small>checkout flow</small></div><div class="window-card front"><span class="window-bar"></span><b>Admin</b><small>permissions flow</small><strong>âœ“ session active</strong></div></div>
+      </section>
+
+      <section class="proof wrap" aria-label="Product facts"><div><strong>Separate cookies</strong><span>per managed tab</span></div><div><strong>Separate storage</strong><span>localStorage, sessionStorage, IndexedDB</span></div><div><strong>One workflow</strong><span>create â†’ open â†’ compare</span></div></section>
+
+      <section id="workflow" class="section wrap"><div class="section-heading"><p class="eyebrow">A repeatable QA loop</p><h2>Create roles. Open sessions. Compare results.</h2><p>Set up the same test once, then inspect each account without destroying the state of the others.</p></div><div class="steps"><article><span class="step-number">01</span><h3>Name the test user</h3><p>Create a session such as <b>Admin</b> or <b>Standard user</b> from the toolbar popup.</p></article><article><span class="step-number">02</span><h3>Open an isolated tab</h3><p>Choose <b>Open new tab</b> or reload the current tab with <b>Use this tab</b>, then sign in normally.</p></article><article><span class="step-number">03</span><h3>Run the scenario</h3><p>Create another session and compare permissions, logout behavior, and user journeys side by side.</p></article></div></section>
+
+      <section id="qa" class="feature-section"><div class="wrap feature-grid"><div><p class="eyebrow">Built for real test work</p><h2>Stop using incognito windows as test infrastructure.</h2><p>Keep a stable set of test identities available while you debug. Name and color-code sessions, group them by site, and export a local backup when you need to move a test setup.</p><ul class="check-list"><li>Role-based access and permission checks</li><li>Parallel login and logout testing</li><li>Account-specific bug reproduction</li><li>Support and client account comparisons</li></ul><a class="text-link" href="QA_RELEASE_CHECKLIST.md">Open the manual QA checklist â†’</a></div><figure class="shot"><img src="assets/screenshot-4-manage.png" alt="Session manager showing named QA sessions grouped by website" loading="lazy"><figcaption>Organize named test identities by site.</figcaption></figure></div></section>
+
+      <section class="gallery wrap" aria-label="Screenshots"><figure><img src="assets/screenshot-1-hero.png" alt="Session Switcher popup showing multiple named sessions" loading="lazy"><figcaption>Multiple identities, one toolbar.</figcaption></figure><figure><img src="assets/screenshot-2-oneclick.png" alt="Session Switcher workflow for opening a named session" loading="lazy"><figcaption>Create â†’ open â†’ log in.</figcaption></figure><figure><img src="assets/screenshot-3-isolation.png" alt="Two isolated sessions showing different test users" loading="lazy"><figcaption>Compare user results side by side.</figcaption></figure></section>
+
+      <section id="limits" class="limits"><div class="wrap limits-grid"><div><p class="eyebrow">Know the boundaries</p><h2>Designed for session convenience, with honest limits.</h2></div><div class="limit-copy"><p>Sessions are scoped to a site/domain. After a browser restart, reconnect restored tabs before using them. Cross-domain SSO can behave differently because identity providers use their own domains.</p><p>Managed tabs disable site service workers so their requests cannot bypass tab-level isolation. That can affect offline cache and web push. This extension is not a security sandbox or a replacement for separate browser profiles.</p><a class="text-link" href="ARCHITECTURE.md">Read the technical architecture â†’</a></div></div></section>
+
+      <section class="cta wrap"><p class="eyebrow">Ready for the next test run?</p><h2>Give every role its own tab.</h2><p>Install the extension, create Admin and Standard user sessions, and run your first parallel scenario in minutes.</p><div class="actions"><a class="button primary" href="https://chromewebstore.google.com/search/Session%20Switcher">Find Session Switcher <span aria-hidden="true">â†—</span></a><a class="button secondary" href="https://github.com/houtan-rocky/chrome-extension-session-switcher/issues">Report an issue <span aria-hidden="true">â†—</span></a></div></section>
+    </main>
+
+    <footer class="footer wrap"><span>Â© 2026 Session Switcher</span><span><a href="PRIVACY.md">Privacy</a><a href="CHANGELOG.md">Changelog</a><a href="https://github.com/houtan-rocky/chrome-extension-session-switcher">GitHub</a></span></footer>
+  </body>
+</html>
+

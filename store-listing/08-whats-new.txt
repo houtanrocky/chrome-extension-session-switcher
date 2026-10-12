@@ -1,0 +1,9 @@
+Version 0.2.0
+
+• Improved recovery when a temporary cookie-rule update fails, so a live tab is not silently forgotten.
+• Added a first-use guide for creating Admin and Standard user sessions for QA testing.
+• Replaced unlabeled session icons with Use this tab and Open new tab actions.
+• Added a clearer Create another session flow.
+• Added a one-time in-extension update note.
+
+For support: this release improves one possible detachment path. It does not claim that every long-running disconnect has been diagnosed. Please report the browser version, extension version, approximate idle time, and whether the computer slept.

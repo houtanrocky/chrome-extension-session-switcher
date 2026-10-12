@@ -1,0 +1,14 @@
+Single purpose: Keep separate sessions for websites that users explicitly manage, allowing multiple accounts to be used or tested side by side.
+
+Data handling answers:
+• The extension does not sell, transfer, or share user data with third parties.
+• The extension does not use data for advertising, creditworthiness, lending, or personalized advertising.
+• The extension does not collect analytics or telemetry.
+• Session names, colors, domains, captured session cookies, tab bindings, and namespaced website storage are used only to provide session isolation and local session management.
+• Data is stored locally in chrome.storage. Nothing is sent to a developer server.
+• Exported JSON backups are created only when the user requests an export and remain under the user's control.
+
+Privacy policy: use the hosted URL for `PRIVACY.md`. The policy must be publicly reachable before submission. Update its date and contact address when those details change.
+
+User-facing privacy note:
+This extension can handle authentication cookies because isolating login sessions is its single purpose. Do not use exported backups as ordinary documents: they may contain login material.

@@ -1,7 +1,7 @@
 {
   "name": "session-switcher",
-  "version": "0.1.0",
-  "description": "Per-tab account isolation for any login-gated or rate-limited site. Run many logins side by side in one window.",
+  "version": "0.2.0",
+  "description": "Test multiple accounts side by side with separate cookies and storage for QA and multi-session testing.",
   "type": "module",
   "private": true,
   "scripts": {

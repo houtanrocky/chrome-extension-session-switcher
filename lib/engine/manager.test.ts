@@ -1,8 +1,10 @@
-import { beforeEach, describe, it, expect } from 'vitest';
+import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { makeChrome, type FakeChrome } from '../../test/chromeMock';
 import { SessionManager } from './manager';
 
 let fake: FakeChrome;
+
+afterEach(() => vi.restoreAllMocks());
 
 beforeEach(() => {
   fake = makeChrome();
@@ -16,6 +18,56 @@ async function freshManager() {
 }
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+describe('rule recovery', () => {
+  it('retries a transient failure without losing the binding or existing rule', async () => {
+    const m = await freshManager();
+    const s = await m.createSession('example.com', 'QA');
+    const tabId = await m.openInSession(s.id);
+    const update = vi.spyOn(chrome.declarativeNetRequest, 'updateSessionRules')
+      .mockRejectedValueOnce(new Error('Temporary DNR failure'));
+    fake.simulateResponse(tabId, 'https://example.com/', ['sid=QA']);
+    await delay(400);
+    expect(update).toHaveBeenCalledTimes(2);
+    expect((await m.getContext(tabId)).boundSessionId).toBe(s.id);
+    expect(cookieHeaderFor(tabId)).toBe('sid=QA');
+  });
+
+  it('preserves a live binding after repeated failure and blocks initial navigation', async () => {
+    const m = await freshManager();
+    const s = await m.createSession('example.com', 'QA');
+    const update = vi.spyOn(chrome.declarativeNetRequest, 'updateSessionRules')
+      .mockRejectedValue(new Error('DNR unavailable'));
+    await expect(m.openInSession(s.id)).rejects.toThrow('DNR unavailable');
+    const tab = [...fake.state.tabs.values()][0]!;
+    expect(tab.url).toBe('about:blank');
+    expect((await m.getContext(tab.id)).boundSessionId).toBe(s.id);
+    expect(update).toHaveBeenCalledTimes(3);
+  });
+
+  it('removes a stale binding only when the tab is confirmed absent', async () => {
+    const m = await freshManager();
+    const s = await m.createSession('example.com', 'QA');
+    const tabId = await m.openInSession(s.id);
+    fake.state.tabs.delete(tabId);
+    vi.spyOn(chrome.declarativeNetRequest, 'updateSessionRules')
+      .mockRejectedValue(new Error('Invalid tab'));
+    fake.simulateResponse(tabId, 'https://example.com/', ['sid=QA']);
+    await delay(150);
+    expect(fake.state.session.get('bindings')).toEqual({});
+  });
+
+  it('rehydrates bindings and cookie rules after background worker restart', async () => {
+    const first = await freshManager();
+    const s = await first.createSession('example.com', 'QA');
+    const tabId = await first.openInSession(s.id);
+    fake.simulateResponse(tabId, 'https://example.com/', ['sid=QA']);
+    await delay(150);
+    const restarted = await freshManager();
+    expect((await restarted.getContext(tabId)).boundSessionId).toBe(s.id);
+    expect(cookieHeaderFor(tabId)).toBe('sid=QA');
+  });
+});
 /** The DNR-injected Cookie header for a tab ('' when the rule removes it). */
 function cookieHeaderFor(tabId: number): string {
   const rule = fake.ruleFor(tabId);

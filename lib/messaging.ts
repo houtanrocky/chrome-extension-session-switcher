@@ -92,15 +92,15 @@ export type Handlers = {
 };
 
 /** Background-side: wire a handler map onto `runtime.onMessage`. */
-export function registerHandlers(handlers: Handlers): void {
+export function registerHandlers(handlers: Handlers, ready: Promise<void> = Promise.resolve()): void {
   chrome.runtime.onMessage.addListener((message: Envelope<MessageType>, sender, sendResponse) => {
     const handler = handlers[message?.type];
     if (!handler) return false;
 
-    (handler as (p: unknown, s: chrome.runtime.MessageSender) => Promise<unknown>)(
+    ready.then(() => (handler as (p: unknown, s: chrome.runtime.MessageSender) => Promise<unknown>)(
       message.payload,
       sender,
-    )
+    ))
       .then((data) => sendResponse({ ok: true, data }))
       .catch((err: unknown) =>
         sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) }),

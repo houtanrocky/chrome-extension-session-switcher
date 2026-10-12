@@ -6,14 +6,26 @@ export function App() {
   const [ctx, setCtx] = useState<TabContext | null>(null);
   const [busy, setBusy] = useState(false);
   const [newName, setNewName] = useState('');
+  const [showUpdate, setShowUpdate] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const version = chrome.runtime.getManifest().version;
 
   const refresh = useCallback(async () => {
     setCtx(await sendMessage('getContext'));
   }, []);
 
   useEffect(() => {
-    void refresh();
+    void refresh().catch((err) => setLoadError(String(err)));
+    void chrome.storage.local.get('releaseNoteSeen').then((data) => {
+      setShowUpdate(data.releaseNoteSeen !== version);
+    });
   }, [refresh]);
+
+  const dismissUpdate = async () => {
+    await chrome.storage.local.set({ releaseNoteSeen: version });
+    setShowUpdate(false);
+  };
 
   const run = useCallback(
     async (fn: () => Promise<unknown>, close = false) => {
@@ -44,7 +56,12 @@ export function App() {
     return (
       <Shell>
         <div class="p-6 flex items-center justify-center gap-2 text-muted text-sm">
-          <span class="i-lucide-loader-circle animate-spin" /> Loading…
+          {loadError ? (
+            <div role="alert">
+              <p>Could not load sessions. {loadError}</p>
+              <button class="btn-ghost mt-2" onClick={() => run(refresh)}>Retry</button>
+            </div>
+          ) : <><span class="i-lucide-loader-circle animate-spin" /> Loading…</>}
         </div>
       </Shell>
     );
@@ -100,6 +117,29 @@ export function App() {
         </div>
       </header>
 
+      {showUpdate && (
+        <aside class="mx-3 mt-3 card p-3 text-xs" aria-label="What's new">
+          <b>What’s new in {version}</b>
+          <p class="mt-1 text-muted">Temporary rule failures now retry without forgetting your session. Session actions have clearer labels.</p>
+          <div class="flex gap-2 mt-2">
+            <button class="btn-ghost text-xs" onClick={() => { setShowGuide(true); void dismissUpdate(); }}>Try the workflow</button>
+            <button class="btn-ghost text-xs" onClick={() => void dismissUpdate()}>Dismiss</button>
+          </div>
+        </aside>
+      )}
+
+      {(ctx.sessions.length <= 1 || showGuide) && (
+        <aside class="mx-3 mt-3 card p-3 text-xs" aria-label="Getting started">
+          <b>Test as multiple users</b>
+          <ol class="list-decimal pl-4 mt-1 space-y-1 text-muted">
+            <li>Create a named session, such as Admin.</li>
+            <li>Choose Open new tab or Use this tab, then log in.</li>
+            <li>Create another session, such as Standard user, and open it alongside the first.</li>
+          </ol>
+          <p class="mt-2 text-faint">Sessions belong to this site. After a browser restart, use these buttons to reconnect restored tabs.</p>
+        </aside>
+      )}
+
       <div class="px-3 pt-3 pb-1.5">
         <div class="flex items-center justify-between px-1 mb-1.5">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-faint">
@@ -115,7 +155,7 @@ export function App() {
             <div class="flex flex-col items-center text-center gap-1.5 px-3 py-5 card">
               <span class="i-lucide-users-round text-xl text-faint" />
               <p class="text-xs text-muted leading-relaxed">
-                No sessions yet for this site.<br />Create one below, then log in.
+                No sessions yet for this site.<br />Create one below, open it, then log in.
               </p>
             </div>
           )}
@@ -135,16 +175,18 @@ export function App() {
       </div>
 
       <div class="px-3 pb-3 pt-1 space-y-2">
-        <div class="flex gap-1.5">
+        <label class="block text-xs text-muted" for="new-session">{ctx.sessions.length ? 'Create another session' : 'Create your first session'}</label>
+        <div class="flex flex-col gap-1.5">
           <input
+            id="new-session"
             class="input"
-            placeholder="New session name (e.g. Work)"
+            placeholder="e.g. Admin, Standard user, Guest"
             value={newName}
             onInput={(e) => setNewName((e.target as HTMLInputElement).value)}
             onKeyDown={(e) => e.key === 'Enter' && newName.trim() && addSession()}
           />
           <button class="btn-primary px-3" disabled={busy || !newName.trim()} onClick={addSession}>
-            <span class="i-lucide-plus" /> Add
+            <span class="i-lucide-plus" /> {ctx.sessions.length ? 'Create another session' : 'Create session'}
           </button>
         </div>
 
@@ -195,7 +237,7 @@ function SessionRow(props: {
   const { session: s, bound, cookies, busy } = props;
   return (
     <div
-      class={`group rounded-xl border px-2.5 py-2 flex items-center gap-2.5 transition-colors ${
+      class={`group rounded-xl border px-2.5 py-2 flex flex-wrap items-center gap-2.5 transition-colors ${
         bound ? 'bg-panel2' : 'bg-panel border-line hover:bg-panel2'
       }`}
       style={bound ? { borderColor: s.color } : undefined}
@@ -213,23 +255,25 @@ function SessionRow(props: {
         <div class="text-[11px] mt-0.5 flex items-center gap-1">
           {cookies > 0 ? (
             <span class="inline-flex items-center gap-1 text-success">
-              <span class="i-lucide-circle-check text-[12px]" /> Logged in · {cookies} cookies
+              <span class="i-lucide-circle-check text-[12px]" /> {cookies} saved cookies
             </span>
           ) : (
             <span class="inline-flex items-center gap-1 text-faint">
-              <span class="i-lucide-circle-dashed text-[12px]" /> Logged out
+              <span class="i-lucide-circle-dashed text-[12px]" /> No saved cookies
             </span>
           )}
         </div>
       </div>
-      {!bound && (
-        <button class="btn-icon" disabled={busy} title="Reload this tab into the session" onClick={props.onUse}>
-          <span class="i-lucide-log-in text-[15px]" />
+      <div class="flex gap-1.5 w-full">
+        {!bound && (
+          <button class="btn-ghost text-xs flex-1 justify-center" disabled={busy} title="Reload this tab into the session" onClick={props.onUse}>
+            <span class="i-lucide-log-in text-[15px]" /> Use this tab
+          </button>
+        )}
+        <button class="btn-ghost text-xs flex-1 justify-center" disabled={busy} onClick={props.onOpen}>
+          <span class="i-lucide-external-link text-[15px]" /> Open new tab
         </button>
-      )}
-      <button class="btn-icon" disabled={busy} title="Open a new tab in this session" onClick={props.onOpen}>
-        <span class="i-lucide-external-link text-[15px]" />
-      </button>
+      </div>
     </div>
   );
 }

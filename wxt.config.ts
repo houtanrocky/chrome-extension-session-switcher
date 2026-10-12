@@ -13,7 +13,7 @@ export default defineConfig({
     name: 'Session Switcher',
     short_name: 'Sessions',
     description:
-      'Run many accounts side by side on the same site — each tab gets its own isolated cookie jar + storage. Beat rate limits.',
+      'Test multiple accounts side by side on the same site. Separate cookies and storage for QA and multi-session testing.',
     // Toolbar button icon. WXT also auto-wires the top-level `icons` from
     // public/icon/*.png (regenerate via `node scripts/gen-icons.mjs`); this
     // pins the crisp small sizes Chrome uses for the action specifically.
