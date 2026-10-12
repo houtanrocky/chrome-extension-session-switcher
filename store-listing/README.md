@@ -1,4 +1,4 @@
-# Chrome Web Store submission files
+﻿# Chrome Web Store submission files
 
 Each file in this directory maps to a Chrome Web Store dashboard section. Copy the contents without the file's Markdown heading unless the dashboard accepts formatting.
 
@@ -19,3 +19,4 @@ Each file in this directory maps to a Chrome Web Store dashboard section. Copy t
 The copy targets QA testers, developers, support engineers, and product teams testing multiple user roles. It avoids unsupported promises: this is a local convenience tool, not a security sandbox or a replacement for browser profiles.
 
 Update version numbers in all relevant files before each release. Keep claims aligned with the shipped build and screenshots.
+
