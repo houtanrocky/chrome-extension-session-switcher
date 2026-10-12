@@ -1,0 +1,76 @@
+name: Bug report
+description: Report a session, cookie, storage, or tab-isolation problem.
+title: "[Bug]: "
+labels: [bug, support]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not include passwords, cookies, tokens, personal data, or exported session backups. Use fictional site/account names.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version
+      placeholder: "0.2.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "Chrome 145 on Windows 11"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system
+      placeholder: "Windows 11, macOS, or Linux"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: What failed?
+      options:
+        - Tab detached or lost its session
+        - Accounts appeared mixed
+        - localStorage or IndexedDB was not isolated
+        - Could not create or open a session
+        - Import or export problem
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: site
+    attributes:
+      label: Site category and tab count
+      description: Do not include private URLs or account names.
+      placeholder: "Internal dashboard, 6 managed tabs"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Create Admin...\n2. Open a second session...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: timing
+    attributes:
+      label: Timing and lifecycle details
+      description: Mention idle time, sleep/wake, browser restart, or extension update if relevant.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed passwords, cookies, tokens, personal data, and exported session files.
+          required: true

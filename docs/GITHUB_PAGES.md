@@ -11,6 +11,8 @@ The page uses relative assets from `docs/assets/`, so it works as a project site
 
 The Chrome Web Store buttons point to the direct listing URL: https://chromewebstore.google.com/detail/session-switcher/ibleijinnlbhcpkgcccfmakidclplgga.
 
+Use `https://houtan-rocky.github.io/chrome-extension-session-switcher/support.html` as the Chrome Web Store **Support URL**. It links visitors to structured bug and support ticket forms in this repository.
+
 Keep docs/PRIVACY.md and docs/CHANGELOG.md synchronized with their root files when those documents change.
 
 

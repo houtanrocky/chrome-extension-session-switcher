@@ -15,7 +15,7 @@ replies, SEO guidance, and the publication checklist.
 
 Built with **WXT + Preact + UnoCSS**, TypeScript throughout, Manifest V3.
 
-**[Project homepage](https://houtan-rocky.github.io/chrome-extension-session-switcher/)** Â· **[Chrome Web Store](https://chromewebstore.google.com/detail/session-switcher/ibleijinnlbhcpkgcccfmakidclplgga)** Â· **[Report an issue](https://github.com/houtan-rocky/chrome-extension-session-switcher/issues)**
+**[Project homepage](https://houtan-rocky.github.io/chrome-extension-session-switcher/)** Â· **[Chrome Web Store](https://chromewebstore.google.com/detail/session-switcher/ibleijinnlbhcpkgcccfmakidclplgga)** Â· **[Support](https://houtan-rocky.github.io/chrome-extension-session-switcher/support.html)**
 
 **Browser support: Chromium only** â€” Chrome, Edge, Brave, Opera, Arc, and other
 Chromium browsers (verified equivalent across two Chromium versions via the E2E
