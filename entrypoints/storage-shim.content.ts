@@ -36,6 +36,10 @@ export default defineContentScript({
     const sessionId = resolveSessionId(realSession);
     if (!sessionId) return; // unmanaged tab → leave native storage untouched
 
+    // Must run before the page can register/use a service worker (whose
+    // requests would bypass the per-tab cookie rule — see below).
+    disableServiceWorkers(realSession);
+
     const prefix = storagePrefix(sessionId);
     installNamespacedStorage('localStorage', realLocal, prefix);
     installNamespacedStorage('sessionStorage', realSession, prefix);
@@ -75,6 +79,66 @@ function readHashMarker(): string | null {
     }
   }
   return null;
+}
+
+/**
+ * Neutralize service workers in a managed tab.
+ *
+ * A page's service worker is *per-origin* — one instance serves every tab of
+ * that origin — and its network requests carry **no tab id**, so the per-tab
+ * `declarativeNetRequest` cookie rule can never match them. A SW-driven site
+ * (a chat app or webmail SPA, say) would therefore route authenticated traffic
+ * through the shared profile and collapse every session onto one identity once
+ * its worker takes control (typically after the first reload). There is no way
+ * to scope a single shared worker per session, so for isolated tabs we block
+ * new registrations and tear down any worker left from a prior unmanaged visit,
+ * keeping all traffic in the page where it is tab-scoped and isolated.
+ */
+function disableServiceWorkers(realSession: Storage): void {
+  const swc = navigator.serviceWorker as ServiceWorkerContainer | undefined;
+  if (!swc) return;
+
+  const wasControlled = !!swc.controller;
+  const getRegistrations = swc.getRegistrations?.bind(swc);
+
+  // Block (re)registration. Rejecting keeps feature-detecting sites happy; if
+  // the property can't be redefined, hide the container as a fallback.
+  try {
+    Object.defineProperty(swc, 'register', {
+      configurable: true,
+      value: () =>
+        Promise.reject(new Error('Service workers are disabled in an isolated session')),
+    });
+  } catch {
+    try {
+      Object.defineProperty(navigator, 'serviceWorker', { configurable: true, get: () => undefined });
+    } catch {
+      /* locked down — best effort */
+    }
+  }
+
+  // Remove any worker registered during an earlier non-isolated visit; if one
+  // was actually controlling this load, reload once (guarded) to escape it.
+  getRegistrations?.()
+    .then((regs) => {
+      if (!regs.length) return undefined;
+      return Promise.all(regs.map((r) => r.unregister().catch(() => false))).then(() => {
+        if (wasControlled && !reloadGuard(realSession)) location.reload();
+      });
+    })
+    .catch(() => {});
+}
+
+/** One-shot guard (per origin) so the unregister-triggered reload can't loop. */
+function reloadGuard(realSession: Storage): boolean {
+  const KEY = '__ss_sw_reloaded__';
+  try {
+    if (realSession.getItem(KEY)) return true;
+    realSession.setItem(KEY, '1');
+    return false;
+  } catch {
+    return true; // can't track it → don't risk a reload loop
+  }
 }
 
 /** Remove only our marker from the URL hash; preserve any legitimate fragment. */

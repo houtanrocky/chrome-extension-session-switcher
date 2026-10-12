@@ -86,58 +86,82 @@ export function App() {
     input.click();
   };
 
+  const totalCookies = Object.values(jarSizes).reduce((a, b) => a + b, 0);
+
   return (
     <div class="min-h-screen bg-bg text-ink font-sans">
       <div class="max-w-3xl mx-auto px-6 py-8">
-        <header class="flex items-center justify-between mb-6">
-          <div>
-            <h1 class="text-xl font-semibold">Session Switcher</h1>
-            <p class="text-sm text-muted">
-              Every session keeps its own cookies + storage. Open as many as you like, side by side.
-            </p>
+        <header class="flex items-center justify-between mb-7">
+          <div class="flex items-center gap-3">
+            <Logo size={38} />
+            <div>
+              <h1 class="text-xl font-semibold leading-tight">Session Switcher</h1>
+              <p class="text-sm text-muted leading-tight">
+                Test Admin, Standard user, and Guest accounts side by side with separate cookies and storage.
+              </p>
+            </div>
           </div>
-          <div class="flex gap-2">
-            <button class="btn-ghost" disabled={busy} onClick={exportData}>Export</button>
-            <button class="btn-ghost" disabled={busy} onClick={() => importData(true)}>Import (merge)</button>
-            <button class="btn-danger" disabled={busy} onClick={() => importData(false)}>Import (replace)</button>
+          <div class="flex gap-2 shrink-0">
+            <button class="btn-ghost whitespace-nowrap" disabled={busy} onClick={exportData}>
+              <span class="i-lucide-download" /> Export
+            </button>
+            <button class="btn-ghost whitespace-nowrap" disabled={busy} onClick={() => importData(true)} title="Add sessions from a backup, keeping existing ones">
+              <span class="i-lucide-git-merge" /> Merge
+            </button>
+            <button class="btn-danger whitespace-nowrap" disabled={busy} onClick={() => importData(false)} title="Replace all sessions with a backup">
+              <span class="i-lucide-replace" /> Replace
+            </button>
           </div>
         </header>
 
-        <div class="card p-3 mb-6 flex flex-wrap items-end gap-2">
+        <p class="text-sm text-muted mb-4">
+          Create a session, choose Open new tab, then log in. Repeat for another user on the same site.
+          Sessions are grouped by site; reconnect restored tabs after restarting the browser.
+        </p>
+        <div class="card p-3.5 mb-7 flex flex-wrap items-end gap-2.5">
           <label class="flex flex-col gap-1">
             <span class="text-xs text-muted">Site domain</span>
             <input
               class="input w-56"
-              placeholder="claude.ai"
+              placeholder="example.com"
               value={domainInput}
               onInput={(e) => setDomainInput((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => e.key === 'Enter' && addSession()}
             />
           </label>
           <label class="flex flex-col gap-1">
             <span class="text-xs text-muted">Session name</span>
             <input
               class="input w-56"
-              placeholder="Work"
+              placeholder="e.g. Admin"
               value={nameInput}
               onInput={(e) => setNameInput((e.target as HTMLInputElement).value)}
               onKeyDown={(e) => e.key === 'Enter' && addSession()}
             />
           </label>
           <button class="btn-primary" disabled={busy || !domainInput.trim()} onClick={addSession}>
-            Create session
+            <span class="i-lucide-plus" /> Create session
           </button>
+          {sessions.length > 0 && (
+            <span class="ml-auto text-xs text-faint self-center">
+              {sessions.length} session{sessions.length === 1 ? '' : 's'} · {totalCookies} cookies
+            </span>
+          )}
         </div>
 
         {groups.length === 0 && (
-          <p class="text-sm text-muted">No sessions yet. Create one above to get started.</p>
+          <div class="flex flex-col items-center text-center gap-2 py-16 text-muted">
+            <span class="i-lucide-users-round text-3xl text-faint" />
+            <p class="text-sm">No sessions yet. Create one above to get started.</p>
+          </div>
         )}
 
         <div class="space-y-6">
           {groups.map(([domain, list]) => (
             <section key={domain}>
-              <div class="flex items-baseline gap-2 mb-2">
+              <div class="flex items-baseline gap-2 mb-2 px-0.5">
                 <h2 class="text-sm font-semibold">{siteName(domain)}</h2>
-                <span class="text-xs text-muted">{domain}</span>
+                <span class="text-xs text-faint">{domain}</span>
               </div>
               <div class="space-y-1.5">
                 {list.map((s) => (
@@ -177,7 +201,7 @@ function SessionRow(props: {
   const [name, setName] = useState(session.name);
 
   return (
-    <div class="card px-3 py-2 flex items-center gap-3">
+    <div class="card px-3 py-2.5 flex items-center gap-3 hover:border-[#363b49] transition-colors">
       <div class="flex gap-1">
         {PALETTE.map((c) => (
           <button
@@ -196,11 +220,34 @@ function SessionRow(props: {
         onBlur={() => name.trim() && name !== session.name && props.onRename(name.trim())}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
       />
-      <span class="text-xs text-muted w-20 text-right">
-        {cookies > 0 ? `${cookies} cookies` : 'logged out'}
+      <span class="w-28 text-right">
+        {cookies > 0 ? (
+          <span class="inline-flex items-center gap-1 text-xs text-success">
+            <span class="i-lucide-circle-check text-[13px]" /> {cookies} cookies
+          </span>
+        ) : (
+          <span class="inline-flex items-center gap-1 text-xs text-faint">
+            <span class="i-lucide-circle-dashed text-[13px]" /> no cookies
+          </span>
+        )}
       </span>
-      <button class="btn-ghost text-xs" disabled={busy} onClick={props.onOpen}>Open</button>
-      <button class="btn-danger text-xs" disabled={busy} onClick={props.onDelete}>Delete</button>
+      <button class="btn-ghost text-xs" disabled={busy} onClick={props.onOpen}>
+        <span class="i-lucide-external-link" /> Open new tab
+      </button>
+      <button class="btn-icon text-danger hover:text-danger hover:bg-[#ff7a7a1a]" disabled={busy} title="Delete session" onClick={props.onDelete}>
+        <span class="i-lucide-trash-2 text-[15px]" />
+      </button>
     </div>
+  );
+}
+
+/** Brand mark — three overlapping account circles, matching the toolbar icon. */
+function Logo({ size = 38 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" class="shrink-0" aria-hidden="true">
+      <circle cx="50" cy="34" r="22" fill="#5cd0ff" />
+      <circle cx="34" cy="64" r="22" fill="#c98cff" />
+      <circle cx="66" cy="64" r="22" fill="#6c8cff" />
+    </svg>
   );
 }

@@ -15,22 +15,12 @@ const MULTI_PART_SUFFIXES = new Set([
   'com.tr', 'com.mx', 'com.sg', 'co.za',
 ]);
 
-/** Curated display names for the sites this extension is built for. */
+/**
+ * Display-name overrides for domains whose auto-derived label would be wrong
+ * (multi-word or non-standard casing). Any domain not listed here falls back to
+ * a Title-Cased base label, so the extension works on every site regardless.
+ */
 const KNOWN_SITES: Record<string, string> = {
-  'claude.ai': 'Claude',
-  'chatgpt.com': 'ChatGPT',
-  'openai.com': 'OpenAI',
-  'gemini.google.com': 'Gemini',
-  'perplexity.ai': 'Perplexity',
-  'poe.com': 'Poe',
-  'character.ai': 'Character.AI',
-  'x.ai': 'Grok',
-  'grok.com': 'Grok',
-  'huggingface.co': 'Hugging Face',
-  'midjourney.com': 'Midjourney',
-  'mistral.ai': 'Mistral',
-  'deepseek.com': 'DeepSeek',
-  'copilot.microsoft.com': 'Copilot',
   'notion.so': 'Notion',
   'figma.com': 'Figma',
   'replit.com': 'Replit',
@@ -75,7 +65,7 @@ export function hostFromUrl(url: string | undefined | null): string | null {
 /** Friendly label for a domain. Falls back to a Title-Cased base name. */
 export function siteName(domain: string): string {
   if (KNOWN_SITES[domain]) return KNOWN_SITES[domain]!;
-  // Match a known subdomain entry (e.g. gemini.google.com under google.com).
+  // Match a known entry by sub/parent domain (e.g. an app. or www. host).
   for (const [key, name] of Object.entries(KNOWN_SITES)) {
     if (key.endsWith('.' + domain) || domain.endsWith('.' + key)) return name;
   }

@@ -1,0 +1,40 @@
+Primary search intent:
+• multi-session testing
+• test multiple user accounts
+• QA browser sessions
+• role-based access testing
+• multiple logins on one site
+
+Secondary phrases to use only where they describe a real feature:
+• parallel account testing
+• separate cookies per tab
+• test Admin and Standard user accounts
+• login/logout testing
+• multi-account browser workflow
+
+Placement:
+1. Name: brand plus one clear use case.
+2. Summary: lead with “test multiple accounts” and “QA”.
+3. First three description lines: state the user, task, and benefit.
+4. Screenshots: use readable captions that explain the workflow.
+5. Homepage: publish a practical guide titled “How to test two user roles in Chrome”.
+6. Changelog: describe user-visible improvements with each version.
+
+Avoid:
+• Keyword lists or repeated phrases.
+• Claims such as “works everywhere”, “airtight”, or “bypass any limit”.
+• Unrelated brand names and competitor names.
+• Incentivized reviews or asking for a specific star rating.
+• Screenshots with real account data.
+
+Promotion plan:
+• Add the Web Store link and a 20-second QA demo to the repository homepage.
+• Publish a short release post with the two-account workflow and a link to the manual QA checklist.
+• Share in QA, browser-extension, and developer communities only where self-promotion is allowed.
+• Ask satisfied users for honest feedback after they complete a real multi-user test.
+• Track installs, retention, support reports, and uninstall changes from the dashboard; do not add analytics solely for marketing.
+
+Official references:
+https://developer.chrome.com/docs/webstore/discovery
+https://developer.chrome.com/docs/webstore/best-listing
+https://developer.chrome.com/docs/webstore/spam-faq/

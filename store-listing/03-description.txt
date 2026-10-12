@@ -1,0 +1,37 @@
+Test your web app as multiple users in one browser window.
+
+Session Switcher helps QA testers, developers, and support teams compare separate accounts on the same website. Open an Admin, Standard user, or Guest session side by side to test role-based access, login/logout behavior, permissions, and user journeys without repeatedly changing your normal browser profile.
+
+GET STARTED
+1. Open your web app and click Session Switcher.
+2. Create a session named Admin.
+3. Choose Open new tab or Use this tab, then log in.
+4. Create another session named Standard user and log in with a different account.
+
+USE CASES
+• Multi-session testing for web applications
+• Comparing user roles and permissions
+• Checking whether logout in one account affects another
+• Keeping QA, support, work, and personal accounts available side by side
+• Reproducing account-specific bugs without separate browser profiles
+
+FEATURES
+• Separate cookie jars for managed tabs
+• Namespaced localStorage, sessionStorage, and IndexedDB
+• Named and color-coded sessions grouped by site
+• Clear Open new tab and Use this tab actions
+• Export and import for local session backups
+• Chromium support: Chrome, Edge, Brave, Opera, and Arc
+
+WHAT'S NEW IN 0.2.0
+• Temporary cookie-rule update failures retry without discarding a live tab's session binding.
+• A first-use guide explains how to create two sessions for the same site.
+• Session actions have visible labels and the next-session action is clearer.
+
+LIMITATIONS
+Sessions are scoped to a site/domain. After a browser restart, reconnect restored tabs before using them. External identity-provider SSO and cross-domain login flows may behave inconsistently. Storage isolation is best effort; this extension is not a security sandbox or a separate browser profile. Managed tabs disable site service-worker registrations, which can affect offline cache and web push. Cookie path handling is approximate.
+
+PRIVACY
+Session data and captured cookies stay in local browser extension storage. There is no developer account, analytics, advertising, tracking, or remote session service. Exported backups contain sensitive login data and should be protected. Normal website requests still go to those websites.
+
+See the support link for the changelog and manual QA checklist. When reporting a problem, include the extension version, browser version, site category, steps, and approximate time before failure. Never include cookies, tokens, credentials, or exported backups.

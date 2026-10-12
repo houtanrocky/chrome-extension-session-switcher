@@ -1,0 +1,18 @@
+Use fictional domains and account names. Screenshots must show the final published UI, contain no real cookies or customer data, and make the QA workflow understandable without opening the description.
+
+1. `screenshot-1-hero.png` — “Test two user roles side by side”
+Show two tabs for the same test site with Admin and Standard user sessions. Make the different session colors and account result visible.
+
+2. `screenshot-2-oneclick.png` — “Create, open, and log in”
+Show the popup's first-use guide and the clearly labeled Create session, Use this tab, and Open new tab actions.
+
+3. `screenshot-3-isolation.png` — “Compare independent logins and storage”
+Show a fictional QA page reporting two different users, with no real provider branding.
+
+4. `screenshot-4-manage.png` — “Organize Admin, Standard user, and Guest”
+Show the manager page grouped by site with names, colors, cookie counts, export, and import.
+
+5. `screenshot-5-compat.png` — “Know the session boundaries”
+Show a concise limitations panel: Chromium browsers, reconnect after browser restart, cross-domain SSO may vary, and managed tabs may lose offline/push behavior.
+
+Optional demo video: 20–30 seconds showing Create session → Open new tab → log in → Create another session → compare both accounts.

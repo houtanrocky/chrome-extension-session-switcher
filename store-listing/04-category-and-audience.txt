@@ -1,0 +1,11 @@
+Category: Productivity
+Language: English (United States)
+Audience: QA testers, software developers, support engineers, product teams, and users who need separate accounts on a supported site.
+
+Suggested homepage: the public repository or product documentation site.
+Suggested support URL: the public issue tracker or support form.
+
+Recommended single-purpose statement:
+Session Switcher keeps separate browser sessions for websites that users explicitly manage, so they can test or use multiple accounts side by side.
+
+Do not list third-party product names as supported brands. Describe categories such as web applications, dashboards, webmail, support desks, and social sites.

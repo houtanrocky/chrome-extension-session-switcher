@@ -2,7 +2,7 @@
  * Core data model shared across the background engine and the UI.
  *
  * A {@link Session} is a named identity scoped to one registrable domain
- * (e.g. "Work" on `claude.ai`). Each session owns an isolated {@link CookieJar}
+ * (e.g. "Work" on `example.com`). Each session owns an isolated {@link CookieJar}
  * and — through the storage shim — an isolated `localStorage` / `sessionStorage`
  * / IndexedDB namespace. A browser *tab* can be *bound* to a session; while
  * bound, all of that tab's traffic and storage use the session's data instead
@@ -15,7 +15,7 @@ export type SameSite = 'no_restriction' | 'lax' | 'strict' | 'unspecified';
 export interface CookieRecord {
   name: string;
   value: string;
-  /** Host without a leading dot (e.g. `claude.ai`). */
+  /** Host without a leading dot (e.g. `example.com`). */
   domain: string;
   path: string;
   secure: boolean;
@@ -32,7 +32,7 @@ export type CookieJar = Record<string, CookieRecord>;
 
 export interface Session {
   id: string;
-  /** Registrable domain this identity belongs to, e.g. `claude.ai`. */
+  /** Registrable domain this identity belongs to, e.g. `example.com`. */
   domain: string;
   /** Human label, e.g. "Work" or "alt #3". */
   name: string;

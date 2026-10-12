@@ -1,0 +1,23 @@
+Support request template:
+
+Subject: Session Switcher – multi-session issue
+
+Please send:
+• Extension version
+• Chrome/Chromium browser and version
+• Operating system
+• Site category (for example, internal dashboard or webmail; do not send credentials)
+• Number of sessions and tabs
+• Exact steps and approximate time until the issue appeared
+• Whether the computer slept or the browser was restarted
+• Whether the issue affects cookies, localStorage/IndexedDB, or both
+
+Never attach cookies, tokens, credentials, or exported session backups.
+
+Reply to Fabiano after publication:
+
+Obrigado pelo feedback, Fabiano. Na versão 0.2.0, adicionamos um guia e botões com nomes mais claros. Para testar duas contas no mesmo site: crie uma sessão, clique em “Open new tab” e faça login. Depois clique em “Create another session”, abra a segunda sessão e entre com outra conta. Se puder testar novamente, gostaria de saber se esse fluxo ficou mais claro.
+
+Reply to Henk after publication:
+
+Hi Henk, version 0.2.0 retries temporary cookie-rule update failures without dropping a live tab's session association. This addresses one possible detachment path, though I have not confirmed it was the cause of your several-hour issue. Could you retest and share the extension/browser version, tab count, and whether it happens after idle time or computer sleep? Please do not include cookies or account details.

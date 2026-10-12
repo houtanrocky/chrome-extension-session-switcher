@@ -12,11 +12,11 @@ import { domainFromUrl, hostFromUrl, registrableDomain, siteName } from '../doma
 import { withNamespaceMarker, NS_SESSION_KEY } from '../shimProtocol';
 import {
   applyToJar,
+  fillRecord,
   fromChromeCookie,
   liveCount,
   parseSetCookie,
   pruneExpired,
-  putRecord,
   toCookieHeader,
 } from './cookieJar';
 import { applyTabRule, clearAllRules, clearTabRule } from './dnr';
@@ -24,6 +24,17 @@ import { installCaptureListener } from './capture';
 import * as store from './store';
 
 const PALETTE = ['#6c8cff', '#ff8f6c', '#4fcf8f', '#ffcf5c', '#c98cff', '#5cd0ff', '#ff6c9d', '#9aa1b2'];
+
+/** True when two URLs differ only by their hash (i.e. a same-document nav). */
+function sameDocument(a: string, b: string): boolean {
+  try {
+    const ua = new URL(a);
+    const ub = new URL(b);
+    return ua.origin === ub.origin && ua.pathname === ub.pathname && ua.search === ub.search;
+  } catch {
+    return false;
+  }
+}
 
 export class SessionManager {
   private bindings = new Map<number, TabBinding>();
@@ -41,7 +52,9 @@ export class SessionManager {
 
     await this.hydrate();
     // Re-assert DNR rules in case the browser session was reset under us.
-    for (const b of this.bindings.values()) await this.refreshTab(b);
+    for (const b of this.bindings.values()) {
+      await this.refreshTab(b).catch((err) => console.error('[session-switcher] rule restore failed', err));
+    }
   }
 
   private async hydrate(): Promise<void> {
@@ -124,9 +137,15 @@ export class SessionManager {
     const current = tab.url ?? '';
     const target =
       domainFromUrl(current) === session.domain ? current : `https://${session.domain}/`;
+    const marked = withNamespaceMarker(target, sessionId);
 
     await this.bind(tabId, session);
-    await chrome.tabs.update(tabId, { url: withNamespaceMarker(target, sessionId) });
+    await chrome.tabs.update(tabId, { url: marked });
+    // Appending the namespace hash to the *current* URL is a same-document
+    // navigation: it does NOT re-run the document_start storage shim, so the
+    // marker would never be read and web-storage isolation would silently stay
+    // off until a manual reload. Force a full reload in that case.
+    if (sameDocument(current, marked)) await chrome.tabs.reload(tabId);
   }
 
   private async bind(tabId: number, session: Session): Promise<void> {
@@ -169,12 +188,16 @@ export class SessionManager {
     const session = await this.requireSession(sessionId);
     const jar = await this.getJar(sessionId);
     const cookies = await chrome.cookies.getAll({ domain: session.domain });
-    for (const c of cookies) putRecord(jar, fromChromeCookie(c));
+    // Only fill cookies the session doesn't already have: importing the shared
+    // profile must never clobber a session's own login (that merged identities
+    // and made independent sessions collapse onto one account).
+    let added = 0;
+    for (const c of cookies) if (fillRecord(jar, fromChromeCookie(c))) added++;
 
     await store.saveJar(sessionId, jar);
     const binding = this.bindings.get(tabId);
     if (binding?.sessionId === sessionId) await this.refreshTab(binding);
-    return cookies.length;
+    return added;
   }
 
   // ---- Set-Cookie capture -------------------------------------------------
@@ -207,7 +230,9 @@ export class SessionManager {
       setTimeout(() => {
         this.refreshTimers.delete(sessionId);
         for (const b of this.bindings.values()) {
-          if (b.sessionId === sessionId) void this.refreshTab(b);
+          if (b.sessionId === sessionId) {
+            void this.refreshTab(b).catch((err) => console.error('[session-switcher] rule refresh failed', err));
+          }
         }
       }, 60),
     );
@@ -216,13 +241,23 @@ export class SessionManager {
   private async refreshTab(binding: TabBinding): Promise<void> {
     const jar = await this.getJar(binding.sessionId);
     if (pruneExpired(jar)) await store.saveJar(binding.sessionId, jar);
-    const header = toCookieHeader(jar, binding.domain);
-    try {
-      await applyTabRule(binding.tabId, binding.domain, header);
-    } catch {
-      // Tab closed between lookup and apply — drop the stale binding.
-      this.bindings.delete(binding.tabId);
-      await store.removeBinding(binding.tabId);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (this.bindings.get(binding.tabId) !== binding) return;
+      try {
+        await applyTabRule(binding.tabId, binding.domain, toCookieHeader(jar, binding.domain));
+        return;
+      } catch (err) {
+        // A DNR error does not imply a closed tab. Preserve its identity and
+        // existing rule while retrying. Confirm absence before dropping it.
+        const tabs = await chrome.tabs.query({});
+        if (!tabs.some((tab) => tab.id === binding.tabId)) {
+          this.bindings.delete(binding.tabId);
+          await store.removeBinding(binding.tabId);
+          return;
+        }
+        if (attempt === 2) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+      }
     }
   }
 

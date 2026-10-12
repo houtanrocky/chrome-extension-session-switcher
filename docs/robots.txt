@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://houtan-rocky.github.io/chrome-extension-session-switcher/sitemap.xml

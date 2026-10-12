@@ -1,0 +1,21 @@
+Before upload:
+
+[ ] Confirm the version is higher than the currently published Web Store version.
+[ ] Update version references in `package.json`, `package-lock.json`, `CHANGELOG.md`, and these listing files.
+[ ] Run `npm run compile`.
+[ ] Run `npm test`.
+[ ] Run `npm run test:e2e`.
+[ ] Complete the 4–8 hour manual test in `docs/QA_RELEASE_CHECKLIST.md`.
+[ ] Test sleep/wake, service-worker sites, 20+ tabs, logout, SSO, browser restart, and export/import.
+[ ] Regenerate or replace screenshots using fictional test data.
+[ ] Confirm the privacy policy is hosted and current.
+[ ] Confirm permission justifications match the manifest.
+[ ] Run `npm run zip` and upload the new ZIP from `.output/`.
+
+After approval:
+
+[ ] Publish the reviewed version.
+[ ] Confirm the live listing shows the new screenshots and description.
+[ ] Post the “What’s new” release note and repository changelog.
+[ ] Reply to relevant reviews with the published version and a specific retest path.
+[ ] Record remaining limitations and support feedback for the next release.

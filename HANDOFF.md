@@ -6,7 +6,7 @@
 ## What this is
 
 A Manifest V3 Chrome extension that lets you run **many accounts side by side**
-on Claude, ChatGPT, Gemini, Perplexity, and any login-gated / rate-limited site,
+on any login-gated / rate-limited site (AI chats, webmail, dashboards, social),
 **concurrently in one window**. Each tab "opened in a session" gets its **own
 isolated cookie jar** and its **own `localStorage` / `sessionStorage` / IndexedDB
 namespace**.
@@ -25,13 +25,55 @@ namespace**.
 
 - ✅ Full codebase written, clean TypeScript, strict mode.
 - ✅ `npm install` works; `wxt prepare` generates `.wxt/` types.
-- ✅ `npm run compile` (tsc --noEmit) passes with **zero errors**.
-- ✅ `npm run build` succeeds → `.output/chrome-mv3` (~59 kB total).
+- ✅ `npm run compile` (tsc --noEmit) passes with **zero errors** (re-verified on Windows / Node 22).
+- ✅ `npm run build` succeeds → `.output/chrome-mv3` (~63 kB total, icons included).
 - ✅ Generated `manifest.json` verified: MV3, correct permissions, and the
   storage shim is registered with `"world": "MAIN"`, `"run_at": "document_start"`,
   `"all_frames": true`.
-- ⛔ **Not yet loaded/tested in a real Chrome browser.** This is the #1 next step.
-- ⛔ No toolbar icons yet (build works without them; default icon used).
+- ✅ **Toolbar icons added** — `public/icon/{16,32,48,96,128}.png`, auto-wired by
+  WXT into `icons` + `action.default_icon`. Regenerate with
+  `node scripts/gen-icons.mjs` (pure-Node PNG encoder, no image deps).
+- ✅ **Automated tests pass** — 48 unit/integration tests (Vitest) **and a
+  10-check real-Chrome end-to-end isolation test**. The E2E loads the built
+  extension in real Chrome and proves: two accounts stay logged in concurrently
+  and isolated, the browser's shared profile is never touched, and web storage
+  is namespaced per session. Verified on **two different Chromium builds**.
+  `npm test`, `npm run test:e2e`. See "Testing".
+- ⚠️ **Real third-party sites not yet manually spot-checked.** The E2E proves the
+  isolation *mechanism* in real Chrome (against a local fake-login server);
+  heavy SPAs with their own service workers / cross-origin SSO still warrant
+  a quick manual pass (see "Known limitations").
+
+### Changes since the original handoff
+
+- **Fixed "import current login" merging identities across sessions.** It copies
+  the *shared* browser profile's login, so using it on a second (or already
+  logged-in) session pulled the first account's cookies in and overwrote the
+  session's own login → sessions collapsed onto one account. Now import only
+  *fills missing* cookies (`fillRecord`, never overwrites), the popup shows the
+  button (relabeled **"Adopt browser login"**) only while the session is logged
+  out, and `importCurrentLogin` returns the count actually added. Regression
+  test in `lib/engine/manager.test.ts`.
+- **Fixed service-worker cookie leakage** (reproduced on a SW-driven SPA: two sessions
+  collapsed onto one account after a reload). Managed tabs now disable service
+  workers — see "Known limitations" for the full mechanism + trade-off. Pinned
+  by a real-Chrome regression test, `test/e2e-sw.mjs`.
+- **Fixed `bindTab` ("Use here") silently not isolating storage.** Appending the
+  `#__ssns=<id>` marker to the tab's *current* URL is a same-document
+  navigation, so the `document_start` storage shim never re-ran and the
+  namespace was never picked up. `bindTab` now forces a reload when the change
+  is hash-only (`sameDocument()` guard in `lib/engine/manager.ts`). "Open"
+  (new-tab) was unaffected — it loads via `about:blank` → real URL (cross-doc).
+  This fix is covered by a regression test (`lib/engine/manager.test.ts`).
+- Added a **test suite**: `lib/**/*.test.ts` (Vitest; engine tests use a faked
+  `chrome` API in `test/chromeMock.ts`) plus a real-browser **E2E** harness
+  (`test/e2e.mjs`) with a local fake-login server.
+- Removed the WSL-only `scripts/*.sh` helpers; added `scripts/gen-icons.mjs`.
+- **Scoped support to Chromium only** (Chrome/Edge/Brave/Opera/Arc) and removed
+  the `dev:firefox` / `build:firefox` scripts. The E2E passes on two different
+  Chromium builds; the Firefox target compiled but can't function — Firefox has
+  no DNR session rules / `tabIds`, which *is* the per-tab cookie engine. (A real
+  Firefox port would use native contextual identities, a separate backend.)
 
 ## Architecture (how isolation actually works)
 
@@ -95,7 +137,8 @@ entrypoints/background.ts            instantiate manager + registerHandlers
 entrypoints/storage-shim.content.ts  MAIN-world storage namespacing shim
 entrypoints/popup/{index.html,main.tsx,App.tsx}    popup UI (per-site sessions)
 entrypoints/manager/{index.html,main.tsx,App.tsx}  full-page manager (all sessions, export/import)
-scripts/*.sh                         WSL-only nvm/build helpers — DELETE on Windows, not part of the extension
+public/icon/{16,32,48,96,128}.png    toolbar icons (generated; do not hand-edit)
+scripts/gen-icons.mjs                regenerates public/icon/*.png — zero deps (raw PNG + zlib)
 README.md                            user-facing docs
 HANDOFF.md                           this file
 ```
@@ -106,17 +149,48 @@ HANDOFF.md                           this file
 cd <repo>
 npm install          # runs wxt prepare (postinstall)
 npm run compile      # type-check (must stay clean)
-npm run dev          # launches Chrome with HMR — easiest for testing
+npm test             # 48 unit/integration tests (Vitest)
+npm run test:e2e     # real-Chrome end-to-end isolation test (10 checks)
+npm run dev          # launches Chrome with HMR — easiest for manual testing
 # or
 npm run build        # -> .output/chrome-mv3 ; load unpacked in chrome://extensions
 ```
 
-Delete the `scripts/` folder — those are WSL/nvm helpers only.
+(The old WSL/nvm `scripts/*.sh` helpers have been removed. `scripts/` now holds
+only `gen-icons.mjs`, the dependency-free icon generator.)
+
+## Testing
+
+**Unit + integration (`npm test`, Vitest, ~1 s):**
+- `lib/domains.test.ts` — eTLD+1 resolution, URL → domain, site names.
+- `lib/shimProtocol.test.ts` — namespace prefixes + `withNamespaceMarker`.
+- `lib/engine/cookieJar.test.ts` — `Set-Cookie` parsing (attributes, Max-Age /
+  Expires, deletions, host-only vs domain), jar apply/prune, `Cookie` header
+  build incl. host/subdomain matching.
+- `lib/engine/manager.test.ts` — the SessionManager against a faked `chrome`
+  API (`test/chromeMock.ts`): session CRUD, `openInSession` rule install, the
+  `bindTab` same-document reload fix, the `Set-Cookie` capture→jar→DNR loop,
+  **two concurrent sessions staying separate**, import-login, export/import,
+  delete-detaches-tabs.
+
+**End-to-end in real Chrome (`npm run test:e2e`):** builds the extension, loads
+it in real Chrome, and drives a local fake-login server (no real accounts):
+- `test/e2e.mjs` — concurrent isolated logins (Alice vs Bob), the shared browser
+  profile staying clean, and per-session web-storage namespacing.
+- `test/e2e-sw.mjs` — the **service-worker regression**: a site whose SW
+  intercepts requests must not break a managed tab's identity (the SW-driven-SPA
+  bug). Shared helpers live in `test/harness.mjs`.
+
+> The E2E needs a Chrome that still honours `--load-extension`. Regular Chrome
+> ≥137 ignores it (a malware mitigation), so the harness uses **Chrome for
+> Testing** — it auto-discovers one in puppeteer's cache, else downloads it
+> (needs network to `storage.googleapis.com`). Point `CHROME_PATH` at your own
+> CfT binary to skip the download.
 
 ## Manual test plan (do this first in real Chrome)
 
 1. Load unpacked `.output/chrome-mv3` (or use `npm run dev`).
-2. Go to `chatgpt.com` (or `claude.ai`). Open popup → create session "A".
+2. Go to any login-gated site. Open popup → create session "A".
 3. Click **Open** → new tab loads logged-out. Log in as account 1.
 4. Back on the site, create session "B" → **Open** → log in as account 2.
 5. Both tabs should stay logged into different accounts **simultaneously**.
@@ -130,10 +204,16 @@ Delete the `scripts/` folder — those are WSL/nvm helpers only.
 
 ## Known limitations / things to watch when testing
 
-- **Site service workers:** a site's own SW issues requests with tabId == -1, so
-  the per-tab DNR rule can't target them → those may use the shared profile.
-  This is the most likely real-world breakage on heavy SPAs. Watch for it on
-  ChatGPT/Claude; if auth leaks, this is why.
+- **Site service workers — FIXED (was the #1 risk; reproduced on a SW-driven SPA).** A
+  site's own SW issues requests with tabId == -1, which the per-tab DNR rule
+  can't target, so a SW-driven SPA collapsed every session onto the shared
+  profile once its worker took control (after the first reload). The storage
+  shim now **disables service workers in managed tabs** (`disableServiceWorkers`
+  in `entrypoints/storage-shim.content.ts`): it blocks registration and
+  unregisters any worker from a prior unmanaged visit (with a one-shot reload),
+  forcing all traffic through the tab-scoped path. Covered by `test/e2e-sw.mjs`.
+  *Trade-off:* managed tabs lose SW features (offline cache, web push) — an
+  acceptable cost for correct isolation. Unmanaged tabs keep their SW.
 - **Set-Cookie capture vs strip ordering:** we both observe `Set-Cookie`
   (webRequest) and strip it (DNR). On Chrome the observer generally still sees
   the original; if captures are missed, verify ordering behavior.
@@ -144,14 +224,17 @@ Delete the `scripts/` folder — those are WSL/nvm helpers only.
 - **Storage shim is invasive:** sites that grab `localStorage`/`indexedDB`
   references before `document_start`, or rely on `indexedDB instanceof
   IDBFactory` internals, may misbehave. Shim fails safe to native storage.
-- **Cross-origin SSO** (e.g. Google account for Gemini) isn't isolated by
+- **Cross-origin SSO** (e.g. a federated Google/Microsoft login) isn't isolated by
   domain-scoped cookies.
 
 ## Suggested next steps (priority order)
 
-1. **Load in real Chrome and run the manual test plan.** Fix whatever breaks —
-   especially service-worker cookie leakage on the target AI sites.
-2. Add toolbar icons: `public/icon/{16,32,48,96,128}.png` (WXT auto-wires).
+1. **Manually spot-check real third-party sites** (the E2E already proves the
+   mechanism — see "Testing"). Log into two accounts on a heavy SPA in two
+   sessions and watch for **service-worker cookie leakage** and cross-origin
+   SSO, the cases the local-server E2E can't exercise.
+2. ~~Add toolbar icons~~ ✅ done (see Status). Tweak the art in
+   `scripts/gen-icons.mjs` if a different mark is wanted.
 3. Consider re-asserting DNR rules / namespace on `webNavigation.onCommitted` if
    in-tab full navigations lose isolation (currently relies on persisted session
    rules + reserved sessionStorage key — verify it holds).
@@ -164,6 +247,6 @@ Delete the `scripts/` folder — those are WSL/nvm helpers only.
 
 Dev happened in WSL (`/home/anon/Repos/chrome-extension-session-switcher`) but
 WSL had no native Linux Node — Node 22 was installed via nvm just to verify the
-build. On Windows, use Windows Node directly. The `scripts/*.sh` helpers exist
-only to bridge the WSL/nvm gap and are safe to delete.
+build. On Windows, use Windows Node directly (verified on Node 22.17.1). The
+`scripts/*.sh` WSL/nvm helpers have since been removed.
 ```

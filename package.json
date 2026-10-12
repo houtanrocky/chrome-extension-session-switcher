@@ -1,26 +1,31 @@
 {
   "name": "session-switcher",
-  "version": "0.1.0",
-  "description": "Per-tab account isolation for AI sites (Claude, ChatGPT, …) and any rate-limited site. Run many logins side by side in one window.",
+  "version": "0.2.0",
+  "description": "Test multiple accounts side by side with separate cookies and storage for QA and multi-session testing.",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "wxt",
-    "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "wxt build && node test/e2e.mjs && node test/e2e-sw.mjs",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
     "preact": "^10.24.3"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.114",
     "@preact/preset-vite": "^2.9.3",
+    "@puppeteer/browsers": "^3.0.4",
     "@types/chrome": "^0.0.287",
+    "puppeteer-core": "^25.1.0",
     "typescript": "^5.7.2",
     "unocss": "^0.65.1",
+    "vitest": "^4.1.9",
     "wxt": "^0.19.13"
   }
 }

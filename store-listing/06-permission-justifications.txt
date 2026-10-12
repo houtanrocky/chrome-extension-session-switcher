@@ -1,0 +1,15 @@
+Host permissions (`<all_urls>`): The user can manage a session on any HTTP or HTTPS site. Host access is needed to apply per-tab cookie rules and observe response cookies for tabs the user explicitly opens or binds to a session.
+
+`declarativeNetRequest`: Installs a session-scoped, per-tab rule that sends that tab's session cookie header and removes incoming `Set-Cookie` from the shared browser profile.
+
+`webRequest`: Observes response headers so Set-Cookie values can be copied into the selected session's local cookie jar. It does not send data to a remote server.
+
+`cookies`: Lets the user choose “Adopt browser login” to copy existing cookies into an empty session as a one-time local bootstrap.
+
+`storage` and `unlimitedStorage`: Stores session definitions, cookie jars, and release-note state locally. Unlimited storage prevents larger QA session sets from being truncated.
+
+`tabs`: Reads the active tab's URL and opens or manages tabs selected by the user.
+
+`scripting`: Removes the extension's reserved session marker when a user detaches a tab.
+
+No remote code is used. No new permissions are requested for version 0.2.0.
