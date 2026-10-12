@@ -1,10 +1,10 @@
-# Chrome Web Store listing and update communication
+﻿# Chrome Web Store listing and update communication
 
 Use this copy after the release passes automated and manual acceptance. Dashboard publication and review replies are manual. Do not claim the several-hour disconnect is resolved until it is reproduced and verified.
 
 ## Positioning
 
-Keep the brand **Session Switcher**. Lead with QA testers comparing multiple users, roles, and permissions. Secondary audiences can still use it for work/personal accounts. Avoid “works everywhere”, “airtight isolation”, and “beat rate limits”: those claims exceed the supported behavior.
+Keep the brand **Session Switcher**. Lead with QA testers comparing multiple users, roles, and permissions. Secondary audiences can still use it for work/personal accounts. Avoid â€œworks everywhereâ€, â€œairtight isolationâ€, and â€œbeat rate limitsâ€: those claims exceed the supported behavior.
 
 Manifest summary (in `wxt.config.ts`):
 
@@ -12,7 +12,7 @@ Manifest summary (in `wxt.config.ts`):
 Test multiple accounts side by side on the same site. Separate cookies and storage for QA and multi-session testing.
 ```
 
-Optional future title, if adopted consistently in the manifest and listing: **Session Switcher – Multi-Session Testing**.
+Optional future title, if adopted consistently in the manifest and listing: **Session Switcher â€“ Multi-Session Testing**.
 
 ## Description to paste
 
@@ -28,22 +28,22 @@ GET STARTED
 4. Create another session named Standard user, open it, and log into a different account.
 
 USE IT FOR
-• Multi-session testing and comparing user roles
-• Checking whether logout in one session affects another
-• Keeping test accounts available side by side
-• Separating work and personal accounts on supported sites
+â€¢ Multi-session testing and comparing user roles
+â€¢ Checking whether logout in one session affects another
+â€¢ Keeping test accounts available side by side
+â€¢ Separating work and personal accounts on supported sites
 
 FEATURES
-• Separate session cookie jars
-• Namespaced localStorage, sessionStorage, and IndexedDB
-• Named, color-coded sessions grouped by site
-• Session export/import for backups
-• Clear controls to open a new tab or use the current tab
+â€¢ Separate session cookie jars
+â€¢ Namespaced localStorage, sessionStorage, and IndexedDB
+â€¢ Named, color-coded sessions grouped by site
+â€¢ Session export/import for backups
+â€¢ Clear controls to open a new tab or use the current tab
 
 WHAT'S NEW IN 0.2.0
-• Temporary cookie-rule failures retry without forgetting a live tab's session
-• A guide walks you through creating two sessions on the same site
-• Visible session action labels and a Create another session control
+â€¢ Temporary cookie-rule failures retry without forgetting a live tab's session
+â€¢ A guide walks you through creating two sessions on the same site
+â€¢ Visible session action labels and a Create another session control
 
 LIMITATIONS
 Sessions are scoped to a site/domain. After a browser restart, reconnect restored tabs before using them. External identity-provider SSO and cross-domain login flows may behave inconsistently. Storage isolation is best effort; this extension is not a security sandbox or a separate browser profile. Managed tabs block new site service-worker registrations and unregister existing origin registrations, which can also affect the site's offline/push behavior in other tabs. Cookie path handling is approximate.
@@ -58,13 +58,13 @@ See the linked homepage for the changelog, supported behavior, and testing check
 
 Replace screenshots after the UI is finalized. Show the actual extension beside a test application with fictional data:
 
-1. Admin and Standard user visible side by side: “Compare two users on the same site”.
-2. First-session guide: “Create → Open → Log in”.
-3. Clearly labeled popup controls: “Create another session”.
-4. Manager grouped by site: “Organize your QA accounts”.
-5. Accurate limitations and privacy: “Local session data; reconnect tabs after restart”.
+1. Admin and Standard user visible side by side: â€œCompare two users on the same siteâ€.
+2. First-session guide: â€œCreate â†’ Open â†’ Log inâ€.
+3. Clearly labeled popup controls: â€œCreate another sessionâ€.
+4. Manager grouped by site: â€œOrganize your QA accountsâ€.
+5. Accurate limitations and privacy: â€œLocal session data; reconnect tabs after restartâ€.
 
-Record a 20–30 second workflow showing both identities. Add the store install link, changelog link, and support link to the public repository/homepage. Only use real screenshots of the final build; do not display customer data.
+Record a 20â€“30 second workflow showing both identities. Add the store install link, changelog link, and support link to the public repository/homepage. Only use real screenshots of the final build; do not display customer data.
 
 ## Existing-user communication
 
@@ -77,7 +77,7 @@ Record a 20–30 second workflow showing both identities. Add the store install 
 ### Draft reply to Fabiano (Portuguese; after publication)
 
 ```text
-Obrigado pelo feedback, Fabiano. Na versão 0.2.0, adicionamos um guia e botões com nomes mais claros. Para testar duas contas no mesmo site: crie uma sessão, clique em “Open new tab” e faça login. Depois clique em “Create another session”, abra a segunda sessão e entre com outra conta. Se puder testar novamente, gostaria de saber se esse fluxo ficou mais claro.
+Obrigado pelo feedback, Fabiano. Na versÃ£o 0.2.0, adicionamos um guia e botÃµes com nomes mais claros. Para testar duas contas no mesmo site: crie uma sessÃ£o, clique em â€œOpen new tabâ€ e faÃ§a login. Depois clique em â€œCreate another sessionâ€, abra a segunda sessÃ£o e entre com outra conta. Se puder testar novamente, gostaria de saber se esse fluxo ficou mais claro.
 ```
 
 ### Draft follow-up to Henk (after publication)
@@ -88,17 +88,18 @@ Hi Henk, version 0.2.0 now retries temporary cookie-rule update failures without
 
 ## Search and discovery
 
-Use “multiple accounts”, “multi-session testing”, “QA testing”, and “role-based access testing” naturally in relevant sentences. Do not append a keyword dump. Google documents metadata relevance, user experience, ratings, and usage signals; it does not publish exact ranking weights or guarantee a freshness boost. Prioritize a clear purpose, useful onboarding, accurate screenshots, and retention.
+Use â€œmultiple accountsâ€, â€œmulti-session testingâ€, â€œQA testingâ€, and â€œrole-based access testingâ€ naturally in relevant sentences. Do not append a keyword dump. Google documents metadata relevance, user experience, ratings, and usage signals; it does not publish exact ranking weights or guarantee a freshness boost. Prioritize a clear purpose, useful onboarding, accurate screenshots, and retention.
 
 Official references: [Discovery](https://developer.chrome.com/docs/webstore/discovery), [listing guidance](https://developer.chrome.com/docs/webstore/best-listing), and [spam FAQ](https://developer.chrome.com/docs/webstore/spam-faq/).
 
 ## Package and release
 
 1. Confirm the version exceeds the published version; align `package.json`, `package-lock.json`, and release copy.
-2. Complete [QA acceptance](docs/QA_RELEASE_CHECKLIST.md), including the 4–8 hour check.
+2. Complete [QA acceptance](docs/QA_RELEASE_CHECKLIST.md), including the 4â€“8 hour check.
 3. Run `npm run zip` and upload the new ZIP from `.output/` to the existing store item.
 4. Review privacy disclosures and permission justifications. No permissions were added in this update.
 5. Update listing text/screenshots, submit for review, and publish after approval. Use deferred publication if coordinating announcements.
 6. Confirm the published version before posting replies or announcements.
 
 Chrome requires a higher version for each update. See [updating an item](https://developer.chrome.com/docs/webstore/update). This repository does not publish automatically.
+
