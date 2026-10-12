@@ -143,7 +143,8 @@ export function makeChrome() {
         responseHeaders: setCookie.map((value) => ({ name: 'set-cookie', value })),
       }),
     /** The DNR session rule currently installed for a tab, if any. */
-    ruleFor: (tabId: number) => sessionRules.get(tabId),
+    ruleFor: (tabId: number) =>
+      [...sessionRules.values()].find((rule) => rule.condition.tabIds?.includes(tabId)),
   };
 }
 

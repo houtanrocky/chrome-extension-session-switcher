@@ -44,6 +44,12 @@ export default defineBackground(() => {
     importCurrentLogin: async ({ sessionId, tabId }) => ({
       imported: await manager.importCurrentLogin(sessionId, tabId),
     }),
+    captureDocumentCookie: async ({ url, cookie }, sender) => {
+      const tabId = sender.tab?.id;
+      if (tabId === undefined) throw new Error('Cookie event has no tab');
+      await manager.captureDocumentCookie(tabId, url, cookie);
+      return { ok: true } as const;
+    },
     exportData: async () => manager.exportData(),
     importData: async ({ backup, merge }) => ({
       sessions: await manager.importData(backup, merge),

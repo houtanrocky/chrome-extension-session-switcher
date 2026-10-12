@@ -1,11 +1,11 @@
 /**
- * SessionManager — the single orchestrator the background service worker owns.
+ * SessionManager â€” the single orchestrator the background service worker owns.
  * It holds the live in-memory caches (bindings + jars), wires the Set-Cookie
  * capture listener, and exposes every high-level operation the UI calls.
  *
  * Design note (hybrid path): all cookie state flows through here, so swapping
  * the snapshot/header backend for a future true-proxy backend means changing
- * this class and `dnr.ts` only — the UI and message protocol stay put.
+ * this class and `dnr.ts` only â€” the UI and message protocol stay put.
  */
 import type { BackupFile, CookieJar, Session, TabBinding, TabContext } from '../types';
 import { domainFromUrl, hostFromUrl, registrableDomain, siteName } from '../domains';
@@ -122,7 +122,7 @@ export class SessionManager {
     const startUrl = url ?? `https://${session.domain}/`;
 
     // Open a blank tab first so the DNR rule is in place before the real
-    // navigation fires — otherwise the first request races the rule.
+    // navigation fires â€” otherwise the first request races the rule.
     const tab = await chrome.tabs.create({ url: 'about:blank', active: true });
     if (tab.id === undefined) throw new Error('Failed to create tab');
 
@@ -200,6 +200,11 @@ export class SessionManager {
     return added;
   }
 
+  /** Capture a cookie assigned through document.cookie in a managed page. */
+  async captureDocumentCookie(tabId: number, url: string, cookie: string): Promise<void> {
+    await this.handleSetCookie(tabId, url, [cookie]);
+  }
+
   // ---- Set-Cookie capture -------------------------------------------------
 
   private async handleSetCookie(tabId: number, url: string, values: string[]): Promise<void> {
@@ -244,7 +249,7 @@ export class SessionManager {
     for (let attempt = 0; attempt < 3; attempt++) {
       if (this.bindings.get(binding.tabId) !== binding) return;
       try {
-        await applyTabRule(binding.tabId, binding.domain, toCookieHeader(jar, binding.domain));
+        await applyTabRule(binding.tabId, binding.domain, jar);
         return;
       } catch (err) {
         // A DNR error does not imply a closed tab. Preserve its identity and

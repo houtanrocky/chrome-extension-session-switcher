@@ -87,19 +87,21 @@ flowchart TB
 
 ### The rule
 
-For each managed tab we install exactly **one `declarativeNetRequest` *session*
-rule**, with `ruleId === tabId` (unique among live tabs). See
+For each managed tab we install a base `declarativeNetRequest` *session* rule
+plus one host-specific session rule for each cookie host in the tab jar. Each
+rule has `tabIds` and `requestDomains` conditions. See
 [`dnr.ts`](../lib/engine/dnr.ts):
 
 ```
-condition: { tabIds: [tabId], requestDomains: [domain], resourceTypes: [main_frame, sub_frame, xmlhttprequest, script, image, stylesheet, font, media, ping, other] }
+condition: { tabIds: [tabId], requestDomains: [host], resourceTypes: [...] }
 action:    MODIFY_HEADERS
-  request:  set  "cookie"     = <session jar serialized for this domain>   (or REMOVE when the jar is empty ⇒ logged-out)
-  response: remove "set-cookie"                                            (so the browser's shared jar is never written)
+  request:  set  "cookie"     = <cookies matching this request host and path>
+  response: remove "set-cookie" (so the browser's shared jar is never written)
 ```
 
-`tabIds` conditions are only valid on **session** rules — which conveniently
-also survive SW restarts and auto-clear on browser restart.
+`tabIds` conditions are only valid on **session** rules; they survive service-
+worker restarts and auto-clear on browser restart. Host and path-specific rules
+also prevent unrelated subdomain cookies from creating oversized headers.
 
 ### The capture → inject loop
 
@@ -140,9 +142,8 @@ Implementation notes:
   self-contained implementation: `parseSetCookie` (attributes, `Max-Age`/`Expires`,
   deletions, host-only vs domain), `toCookieHeader` (host/subdomain matching),
   `pruneExpired`, and `fillRecord` (insert-without-overwrite, used by import).
-- Cookie keys are `name \0 domain \0 path`. The header is computed **coarsely**
-  for the registrable domain and applied to it and its subdomains — identity
-  isolation, not byte-exact cookie semantics, is the goal.
+- Cookie keys are `name \0 domain \0 path`. DNR rules are generated per cookie
+  host and path, so each request receives only the cookies that match its URL.
 
 ---
 
@@ -244,12 +245,12 @@ Binding state is also reconciled on `tabs.onRemoved` and on every SW startup
 | `localStorage` / `sessionStorage` | ✅ per session | key prefix `__ss:<id>:` |
 | IndexedDB | ✅ per session | DB-name prefix `__ss_<id>__` |
 | Service workers | ✅ neutralized in managed tabs | registration blocked + existing unregistered |
-| `document.cookie` (JS-set cookies) | ⚠️ **shared** | not intercepted — reads/writes hit the real per-origin jar. Server-side auth (httpOnly cookies) is unaffected since those flow through the DNR-controlled header; but non-httpOnly cookies are visible across sessions |
+| `document.cookie` (JS-set cookies) | ⚠️ **best effort** | writes are captured into the managed session jar; reads still use the browser's per-origin store, so non-httpOnly values can be visible across sessions |
 | Cache Storage (`caches`) | ⚠️ shared | per-origin; not namespaced (mostly mooted by disabling SWs) |
 | Cross-origin SSO (a *separate* identity provider, e.g. a federated Google/Microsoft login) | ⚠️ not isolated | only the site's own registrable domain is rewritten |
 | HTTP auth, TLS client certs, `Authorization` tokens in JS memory | ❌ out of scope | not a cookie/storage channel |
 
-**Path-scoped cookies** are sent coarsely (the whole domain jar per request) and
+**Path-scoped cookies** are matched to the request path, while
 all sessions on one origin **share that origin's `localStorage` quota** (keys are
 prefixed within one physical store, not given separate quotas).
 

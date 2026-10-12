@@ -18,6 +18,7 @@ Run `npm run compile`, `npm test`, and `npm run test:e2e`. Build with `npm run b
 | Logout | Logging out in one session must not log out another session or the normal browser profile. |
 | Site service worker | Test a site previously visited normally. Managed-tab identity stays separate; offline/push support may be unavailable. |
 | SSO | Test external identity-provider redirects and popups separately; cross-domain SSO is a known limitation. Record failures rather than claiming support. |
+| Bot-protected commerce site | Test Amazon or another WAF-protected site with a clean session. The page should not repeatedly refresh or show `Request Header Or Cookie Too Large` during normal navigation. |
 | Restart | Sessions remain listed, but restored tabs require explicit reconnection after browser restart. Reconnect before sending authenticated requests. |
 | Backup | Export and merge into a clean test profile; saved sessions remain usable. Treat the file as sensitive login data. |
 | Update note | Dismiss, reopen, and verify it stays hidden for this version. Try the workflow reveals the guide. |

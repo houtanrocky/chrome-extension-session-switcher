@@ -51,6 +51,11 @@ export interface MessageMap {
     req: { sessionId: string; tabId: number };
     res: { imported: number };
   };
+  /** Capture a cookie written by page JavaScript in a managed tab. */
+  captureDocumentCookie: {
+    req: { url: string; cookie: string };
+    res: { ok: true };
+  };
   exportData: {
     req: {};
     res: BackupFile;
