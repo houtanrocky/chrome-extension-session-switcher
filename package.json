@@ -1,6 +1,6 @@
 {
   "name": "session-switcher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Test multiple accounts side by side with separate cookies and storage for QA and multi-session testing.",
   "type": "module",
   "private": true,

@@ -1,18 +1,29 @@
-Use fictional domains and account names. Screenshots must show the final published UI, contain no real cookies or customer data, and make the QA workflow understandable without opening the description.
+Use fictional domains and account names. The generated assets use the final extension UI inside editable HTML/CSS browser and demo-page frames. They contain no real cookies or customer data.
 
-1. `screenshot-1-hero.png` — “Test two user roles side by side”
-Show two tabs for the same test site with Admin and Standard user sessions. Make the different session colors and account result visible.
+1. `screenshot-1-hero.png` — “Compare two users side by side”
+Show fictional Teamboard tabs for Admin and Standard user, with the different session colors, account results, and the real popup panel visible.
 
-2. `screenshot-2-oneclick.png` — “Create, open, and log in”
-Show the popup's first-use guide and the clearly labeled Create session, Use this tab, and Open new tab actions.
+2. `screenshot-2-oneclick.png` — “Create a session, open it, log in”
+Show the real first-use guide plus the clearly labeled Create session, Use this tab, and Open new tab actions beside a fictional sign-in page.
 
-3. `screenshot-3-isolation.png` — “Compare independent logins and storage”
-Show a fictional QA page reporting two different users, with no real provider branding.
+3. `screenshot-3-isolation.png` — “Each account gets its own view and storage”
+Show a fictional Teamboard comparison page reporting Admin and Standard user results, with no real provider branding.
 
-4. `screenshot-4-manage.png` — “Organize Admin, Standard user, and Guest”
-Show the manager page grouped by site with names, colors, cookie counts, export, and import.
+4. `screenshot-4-manage.png` — “Organize every account in one place”
+Show the real manager page grouped under `teamboard.test` with Admin, Standard user, Guest, colors, cookie counts, and Export/Merge/Replace controls.
 
 5. `screenshot-5-compat.png` — “Know the session boundaries”
-Show a concise limitations panel: Chromium browsers, reconnect after browser restart, cross-domain SSO may vary, and managed tabs may lose offline/push behavior.
+Show a concise, accurate panel covering Chromium browsers, reconnecting after restart, cross-domain SSO variation, and possible offline/push effects in managed tabs.
 
 Optional demo video: 20–30 seconds showing Create session → Open new tab → log in → Create another session → compare both accounts.
+
+Regenerate after UI or copy changes:
+
+```text
+npm run build
+node test/shot.mjs
+node test/shot.mjs guide
+node test/shot.mjs empty
+node test/shot.mjs manager
+node scripts/gen-screenshots.mjs
+```

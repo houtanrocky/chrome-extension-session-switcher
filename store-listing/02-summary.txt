@@ -1,1 +1,1 @@
-Test multiple accounts side by side on one site with separate cookies and storage for QA and multi-session testing.
+Keep multiple accounts side by side on the same site with separate cookies and storage.
